@@ -1,0 +1,11 @@
+{
+  "name": "Jotunn",
+  "version": "1.0.0",
+  "description": "The Best Bot",
+  "main": "bot.js",
+  "author": "Jalthe",
+  "dependencies": {
+    "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+    "winston": "^3.2.1"
+  }
+}
