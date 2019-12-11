@@ -26,6 +26,9 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 
         switch(cmd) {
             case 'setname':
+                if(args.length < 3) {
+                    break;
+                }
                 const username = args[1].replace('!', '').replace('<@', '').replace('>', '');
                 const nickname = args.slice(2).join(' ');
                 const server = bot.channels[channelID].guild_id;
