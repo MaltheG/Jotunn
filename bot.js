@@ -22,7 +22,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
     // It will listen for messages that will start with `!`
     if (message.substring(0, 1) === '!') {
         const args = message.substring(1).split(' ');
-        const cmd = args[0];
+        const cmd = args[0].toLowerCase();
 
         switch(cmd) {
             case 'setname':
