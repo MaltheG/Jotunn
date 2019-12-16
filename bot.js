@@ -35,7 +35,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 logger.info(username);
                 logger.info(userID);
 
-                if(userID !== username && username !== bot.id) {
+                if(userID !== username) {
                     bot.editNickname({
                         serverID: server,
                         userID: username,
