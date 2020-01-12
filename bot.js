@@ -1,6 +1,7 @@
 var Discord = require('discord.io');
 var logger = require('winston');
 var auth = require('./auth.json');
+const {Client} = require('pg');
 // Configure logger settings
 logger.remove(logger.transports.Console);
 logger.add(new logger.transports.Console, {
@@ -12,6 +13,12 @@ var bot = new Discord.Client({
    token: auth.token,
    autorun: true
 });
+
+const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: true,
+});
+
 bot.on('ready', function (evt) {
     logger.info('Connected');
     logger.info('Logged in as: ');
@@ -64,4 +71,21 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             // Just add any case commands if you want to..
          }
      }
+});
+
+function addName(userID, name) {
+    client.connect();
+
+    client.query('SELECT', (err, res) => {
+        if(err) throw err;
+
+        client.end();
+    });
+}
+
+client.connect();
+client.query('CREATE TABLE History ( UserID varchar(255), Nickname varchar(255), Namer varchar(255), Time TIMESTAMP DEFAULT CURRENT_TIMESTAMP);', (err, res) => {
+    if(err) throw err;
+
+    client.end();
 });
