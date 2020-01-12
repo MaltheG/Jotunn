@@ -77,7 +77,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 function addName(userID, nickname, namer) {
     client.connect();
 
-    client.query('INSERT INTO History (UserID, Nickname, Namer) VALUES (' + userID + ', ' + nickname + ', ' + namer + ');', (err, res) => {
+    client.query("INSERT INTO History (UserID, Nickname, Namer) VALUES ('" + userID + "', '" + nickname + "', '" + namer + "');", (err, res) => {
         if(err) throw err;
 
         client.end();
