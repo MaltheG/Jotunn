@@ -53,7 +53,8 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                             bot.sendMessage({
                                 to: channelID,
                                 message: "Successfully changed name of " + args[1] + " to " + nickname
-                            })
+                            });
+                            addName(username, nickname, userID);
                         } else {
                             bot.sendMessage({
                                 to: channelID,
@@ -73,19 +74,12 @@ bot.on('message', function (user, userID, channelID, message, evt) {
      }
 });
 
-function addName(userID, name) {
+function addName(userID, nickname, namer) {
     client.connect();
 
-    client.query('SELECT', (err, res) => {
+    client.query('INSERT INTO History (UserID, Nickname, Namer) VALUES (' + userID + ', ' + nickname + ', ' + namer + ');', (err, res) => {
         if(err) throw err;
 
         client.end();
     });
 }
-
-client.connect();
-client.query('CREATE TABLE History ( UserID varchar(255), Nickname varchar(255), Namer varchar(255), Time TIMESTAMP DEFAULT CURRENT_TIMESTAMP);', (err, res) => {
-    if(err) throw err;
-
-    client.end();
-});
