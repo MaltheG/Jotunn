@@ -68,7 +68,21 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                         message: "<@" + userID + ">" + " er en pølse"
                     })
                 }
-            break;
+                break;
+            case 'history':
+                if(args.length < 2) {
+                    break;
+                }
+
+                const historyName =  args[1].replace('!', '').replace('<@', '').replace('>', '');
+                var length = 5;
+
+                if(args.length > 2) {
+                    length = parseInt(args[2]);
+                }
+
+                printHistory(channelID, historyName, length);
+                break;
             // Just add any case commands if you want to..
          }
      }
@@ -82,4 +96,21 @@ function addName(userID, nickname, namer) {
 
         client.end();
     });
+}
+
+function printHistory(channelID, userID, length) {
+    client.connect();
+
+    client.query("SELECT Nickname FROM History WHERE UserID='" + userID + "';", (err, res) => {
+        if(err) throw err;
+        
+        for(let row of res.rows) {
+            bot.sendMessage({
+                to: channelID,
+                message: JSON.stringify(row)
+            });
+        }
+
+        client.end();
+    })
 }
