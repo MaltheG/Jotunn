@@ -93,8 +93,6 @@ function addName(userID, nickname, namer) {
 
     client.query("INSERT INTO History (UserID, Nickname, Namer) VALUES ('" + userID + "', '" + nickname + "', '" + namer + "');", (err, res) => {
         if(err) throw err;
-
-        client.end();
     });
 }
 
@@ -103,14 +101,12 @@ function printHistory(channelID, userID, length) {
 
     client.query("SELECT Nickname FROM History WHERE UserID='" + userID + "';", (err, res) => {
         if(err) throw err;
-        
+
         for(let row of res.rows) {
             bot.sendMessage({
                 to: channelID,
-                message: JSON.stringify(row)
+                message: JSON.stringify(row.nickname)
             });
         }
-
-        client.end();
     })
 }
