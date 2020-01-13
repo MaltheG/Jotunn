@@ -105,7 +105,7 @@ function printHistory(channelID, userID, length) {
         for(let row of res.rows) {
             bot.sendMessage({
                 to: channelID,
-                message: JSON.stringify(row.nickname)
+                message: row.nickname
             });
         }
     })
