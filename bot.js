@@ -102,10 +102,14 @@ function printHistory(channelID, userID, length) {
     client.query("SELECT Nickname FROM History WHERE UserID='" + userID + "';", (err, res) => {
         if(err) throw err;
 
-        for(let row of res.rows) {
+        if(length > res.rows.length) {
+            length = res.rows.length;
+        }
+        
+        for(i = 0; i < length; i++) {
             bot.sendMessage({
                 to: channelID,
-                message: row.nickname
+                message: res.rows[i].nickname
             });
         }
     })
