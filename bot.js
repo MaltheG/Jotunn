@@ -73,12 +73,16 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 if(args.length < 2) {
                     break;
                 }
-
+				
+				logger.info(args.length);
+				
                 const historyName =  args[1].replace('!', '').replace('<@', '').replace('>', '');
                 var length = 5;
 
                 if(args.length > 2) {
+					logger.info(args[2]);
                     length = parseInt(args[2]);
+					logger.info(parseInt(args[2]));
                 }
 
                 printHistory(channelID, historyName, length);
