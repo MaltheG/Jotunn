@@ -116,6 +116,7 @@ function printHistory(channelID, userID, length) {
                 to: channelID,
                 message: res.rows[i].nickname
             });
+			logger.info(i);
         }
     })
 }
