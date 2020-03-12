@@ -111,6 +111,7 @@ function printHistory(channelID, userID, length) {
         }
         
         res.rows.reverse();
+		logger.info(res);
         for(i = 0; i < length; i++) {
             bot.sendMessage({
                 to: channelID,
