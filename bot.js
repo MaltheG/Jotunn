@@ -108,7 +108,7 @@ function printHistory(channelID, userID, length) {
         let msg = "";
 
         //Get last n entries
-        for(i = res.rows.length - length - 1; i < res.rows.length; i++) {
+        for(i = res.rows.length - length; i < res.rows.length; i++) {
             msg += res.rows[i].nickname + "\n"
         }
 
