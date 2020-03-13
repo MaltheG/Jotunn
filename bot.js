@@ -107,7 +107,7 @@ function printHistory(channelID, userID, length) {
         let msg = "";
 
 		// Will not send more than 5 messages. Might be a limitation of sending messages in rapid succession
-        for(i = 0; i < length; i++) {
+        for(i = length - 1; i >= 0; i--) {
             msg += res.rows[i].nickname + "\n"
         }
 
