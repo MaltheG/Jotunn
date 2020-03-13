@@ -92,6 +92,8 @@ function addName(userID, nickname, namer) {
     client.query("INSERT INTO History (UserID, Nickname, Namer) VALUES ('" + userID + "', '" + nickname + "', '" + namer + "');", (err, res) => {
         if(err) throw err;
     });
+
+    client.disconnect();
 }
 
 function printHistory(channelID, userID, length) {
@@ -104,9 +106,8 @@ function printHistory(channelID, userID, length) {
             length = res.rows.length;
         }
 
-        msg = "";
+        let msg = "";
 
-        res.rows.reverse();
 		// Will not send more than 5 messages. Might be a limitation of sending messages in rapid succession
         for(i = 0; i < length; i++) {
             msg += res.rows[i].nickname + "\n"
@@ -118,5 +119,7 @@ function printHistory(channelID, userID, length) {
             to: channelID,
             message: msg
         });
-    })
+    });
+
+    client.disconnect()
 }
