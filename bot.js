@@ -92,8 +92,6 @@ function addName(userID, nickname, namer) {
     client.query("INSERT INTO History (UserID, Nickname, Namer) VALUES ('" + userID + "', '" + nickname + "', '" + namer + "');", (err, res) => {
         if(err) throw err;
     });
-
-    client.disconnect();
 }
 
 function printHistory(channelID, userID, length) {
@@ -120,6 +118,4 @@ function printHistory(channelID, userID, length) {
             message: msg
         });
     });
-
-    client.disconnect()
 }
