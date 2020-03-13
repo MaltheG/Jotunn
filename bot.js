@@ -39,8 +39,6 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 const username = args[1].replace('!', '').replace('<@', '').replace('>', '');
                 const nickname = args.slice(2).join(' ');
                 const server = bot.channels[channelID].guild_id;
-                logger.info(username);
-                logger.info(userID);
 
                 if(userID !== username) {
                     bot.editNickname({
@@ -74,15 +72,11 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     break;
                 }
 				
-				logger.info(args.length);
-				
                 const historyName =  args[1].replace('!', '').replace('<@', '').replace('>', '');
                 var length = 5;
 
                 if(args.length > 2) {
-					logger.info(args[2]);
                     length = parseInt(args[2]);
-					logger.info(parseInt(args[2]));
                 }
 
                 printHistory(channelID, historyName, length);
@@ -109,15 +103,18 @@ function printHistory(channelID, userID, length) {
         if(length > res.rows.length) {
             length = res.rows.length;
         }
-        
+
+        msg = "";
+
         res.rows.reverse();
-		logger.info(res);
+		// Will not send more than 5 messages. Might be a limitation of sending messages in rapid succession
         for(i = 0; i < length; i++) {
-            bot.sendMessage({
-                to: channelID,
-                message: res.rows[i].nickname
-            });
-			logger.info(i);
+            msg += res.rows[i].nickname + "\n"
         }
+
+        bot.sendMessage({
+            to: channelID,
+            message: msg
+        });
     })
 }
