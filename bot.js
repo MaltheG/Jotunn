@@ -112,6 +112,8 @@ function printHistory(channelID, userID, length) {
             msg += res.rows[i].nickname + "\n"
         }
 
+        logger.info(msg);
+
         bot.sendMessage({
             to: channelID,
             message: msg
