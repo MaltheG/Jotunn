@@ -95,6 +95,7 @@ function addName(userID, nickname, namer) {
 }
 
 function printHistory(channelID, userID, length) {
+    //Sometimes fails; says already connected. Only happens in printHistory not in addName
     client.connect();
 
     client.query("SELECT Nickname FROM History WHERE UserID='" + userID + "';", (err, res) => {
@@ -106,8 +107,8 @@ function printHistory(channelID, userID, length) {
 
         let msg = "";
 
-		// Will not send more than 5 messages. Might be a limitation of sending messages in rapid succession
-        for(i = length - 1; i >= 0; i--) {
+        //Get last n entries
+        for(i = res.rows.length - length - 1; i < res.rows.length; i++) {
             msg += res.rows[i].nickname + "\n"
         }
 
