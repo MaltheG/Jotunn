@@ -76,7 +76,7 @@ bot.on("message", async message => {
 });
 
 //Set nickname of user in channel
-function setName(message) {
+async function setName(message) {
     const args = message.content.split(' ');
 
     if(args.length < 3) {
@@ -99,23 +99,23 @@ function setName(message) {
         if(member.nickname !== nickname) {
             return message.channel.send("Failed to change name");
         }
-
-        //Connect to database
-        client.connect();
-
-        //Add name to database
-        client.query(`INSERT INTO History (UserID, Nickname, Namer) VALUES('${userID}', '${nickname}', '${message.author.id}');`, (err, res) => {
-            if(err) console.log(err)
-        });
-
-        //Disconnect from database
-        client.end();
-
-        return message.channel.send("Successfully changed name")
     });
+
+    //Connect to database
+    await client.connect();
+
+    //Add name to database
+    await client.query(`INSERT INTO History (UserID, Nickname, Namer) VALUES('${userID}', '${nickname}', '${message.author.id}');`, (err, res) => {
+        if(err) console.log(err)
+    });
+
+    //Disconnect from database
+    await client.end();
+
+    return message.channel.send("Successfully changed name")
 }
 
-function history(message) {
+async function history(message) {
     const args = message.content.split(' ');
 
     if(args.length < 2) {
@@ -136,9 +136,9 @@ function history(message) {
     let msg = "";
 
     //Connect to database
-    client.connect();
+    await client.connect();
 
-    client.query(`SELECT Nickname FROM History WHERE UserID='${userID}';`, (err, res) => {
+    await client.query(`SELECT Nickname FROM History WHERE UserID='${userID}';`, (err, res) => {
         if(err) {
             client.end();
             console.log(err);
@@ -157,7 +157,7 @@ function history(message) {
     });
 
     //Disconnect from database
-    client.end();
+    await client.end();
 
     //Print history
     return message.channel.send(msg);
