@@ -76,7 +76,7 @@ bot.on("message", async message => {
 });
 
 //Set nickname of user in channel
-async function setName(message) {
+function setName(message) {
     const args = message.content.split(' ');
 
     if(args.length < 3) {
@@ -112,7 +112,7 @@ async function setName(message) {
     return message.channel.send("Successfully changed name")
 }
 
-async function history(message) {
+function history(message) {
     const args = message.content.split(' ');
 
     if(args.length < 2) {
@@ -150,7 +150,7 @@ async function history(message) {
         }).catch((err) => {
             console.log(err);
             return message.channel.send("Failed to retrieve history");
-        }).then(client.end);
+        }).then(client.end());
 
     //Print history
     return message.channel.send(msg);
