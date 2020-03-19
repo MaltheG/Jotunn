@@ -105,9 +105,9 @@ async function setName(message) {
     client.connect();
 
     //Add name to database and then disconnect
-    client.query(`INSERT INTO History (UserID, Nickname, Namer) VALUES('${userID}', '${nickname}', '${message.author.id}');`, (err, res) => {
-        if(err) console.log(err)
-    }).then(client.end());
+    client.query(`INSERT INTO History (UserID, Nickname, Namer) VALUES('${userID}', '${nickname}', '${message.author.id}');`)
+        .catch((error) => console.log(error))
+        .then(client.end());
 
     return message.channel.send("Successfully changed name")
 }
@@ -136,24 +136,21 @@ async function history(message) {
     client.connect();
 
     //Get results from db and then disconnect
-    client.query(`SELECT Nickname FROM History WHERE UserID='${userID}';`, (err, res) => {
-        if(err) {
-            client.end();
-            console.log("Okay");
+    client.query(`SELECT Nickname FROM History WHERE UserID='${userID}';`)
+        .then((result) => {
+            //If wished length is more than result length, set length to result length
+            if(length > res.rows.length) {
+                length = res.rows.length;
+            }
+
+            //Get last n entries
+            for(let i = res.rows.length - length; i < res.rows.length; i++) {
+                msg += res.rows[i].nickname + "\n"
+            }
+        }).catch((err) => {
             console.log(err);
             return message.channel.send("Failed to retrieve history");
-        }
-
-        //If wished length is more than result length, set length to result length
-        if(length > res.rows.length) {
-            length = res.rows.length;
-        }
-
-        //Get last n entries
-        for(let i = res.rows.length - length; i < res.rows.length; i++) {
-            msg += res.rows[i].nickname + "\n"
-        }
-    }).then(client.end());
+        }).then(client.end);
 
     //Print history
     return message.channel.send(msg);
