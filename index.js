@@ -293,7 +293,7 @@ function play(guild, song) {
     //Create dispatcher to play song from ytdl
     const dispatcher = serverQueue.connection.play(ytdl(song.url, {
         filter: "audioonly",
-        highWaterMark: 1<<25, //We need a higher than usual buffer or else songs will end prematurely
+        highWaterMark: 1<<20, //We need a higher than usual buffer or else songs will end prematurely
     }))
         .on('finish', () => { //Current song has ended, so play the next song
             console.log("Music ended");
