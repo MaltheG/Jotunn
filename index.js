@@ -141,13 +141,12 @@ function history(message) {
             if(length > res.rows.length) {
                 length = res.rows.length;
             }
-
+            console.log(res);
             //Get last n entries
             for(let i = res.rows.length - length; i < res.rows.length; i++) {
                 msg += res.rows[i].nickname + "\n"
             }
         }).catch((err) => {
-            console.log("Hej");
             console.log(err);
             return message.channel.send("Failed to retrieve history");
         });
