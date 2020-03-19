@@ -102,15 +102,12 @@ async function setName(message) {
     });
 
     //Connect to database
-    await client.connect();
+    client.connect();
 
-    //Add name to database
-    await client.query(`INSERT INTO History (UserID, Nickname, Namer) VALUES('${userID}', '${nickname}', '${message.author.id}');`, (err, res) => {
+    //Add name to database and then disconnect
+    client.query(`INSERT INTO History (UserID, Nickname, Namer) VALUES('${userID}', '${nickname}', '${message.author.id}');`, (err, res) => {
         if(err) console.log(err)
-    });
-
-    //Disconnect from database
-    await client.end();
+    }).then(client.end());
 
     return message.channel.send("Successfully changed name")
 }
@@ -136,11 +133,13 @@ async function history(message) {
     let msg = "";
 
     //Connect to database
-    await client.connect();
+    client.connect();
 
-    await client.query(`SELECT Nickname FROM History WHERE UserID='${userID}';`, (err, res) => {
+    //Get results from db and then disconnect
+    client.query(`SELECT Nickname FROM History WHERE UserID='${userID}';`, (err, res) => {
         if(err) {
             client.end();
+            console.log("Okay");
             console.log(err);
             return message.channel.send("Failed to retrieve history");
         }
@@ -154,10 +153,7 @@ async function history(message) {
         for(let i = res.rows.length - length; i < res.rows.length; i++) {
             msg += res.rows[i].nickname + "\n"
         }
-    });
-
-    //Disconnect from database
-    await client.end();
+    }).then(client.end());
 
     //Print history
     return message.channel.send(msg);
