@@ -137,7 +137,7 @@ async function history(message) {
 
     //Get results from db and then disconnect
     client.query(`SELECT Nickname FROM History WHERE UserID='${userID}';`)
-        .then((result) => {
+        .then((res) => {
             //If wished length is more than result length, set length to result length
             if(length > res.rows.length) {
                 length = res.rows.length;
