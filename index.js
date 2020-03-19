@@ -84,7 +84,7 @@ function setName(message) {
     }
 
     //Get userID from message
-    const userID = args[1].replace('<@', '').replace('>', '');
+    const userID = args[1].replace('<@!', '').replace('>', '');
     //Get nickname from message
     const nickname = args.slice(2).join(' ');
 
@@ -123,7 +123,7 @@ function history(message) {
     }
 
     //Get userID from message
-    const userID = args[1].replace('<@', '').replace('>', '');
+    const userID = args[1].replace('<@!', '').replace('>', '');
 
     let length = 5;
 
