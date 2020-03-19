@@ -106,8 +106,7 @@ function setName(message) {
 
     //Add name to database and then disconnect
     client.query(`INSERT INTO History (UserID, Nickname, Namer) VALUES('${userID}', '${nickname}', '${message.author.id}');`)
-        .catch((error) => console.log(error))
-        .then(client.end());
+        .catch((error) => console.log(error));
 
     return message.channel.send("Successfully changed name")
 }
@@ -151,7 +150,7 @@ function history(message) {
             console.log("Hej");
             console.log(err);
             return message.channel.send("Failed to retrieve history");
-        }).then(client.end());
+        });
 
     //Print history
     return message.channel.send(msg);
