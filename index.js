@@ -146,13 +146,13 @@ function history(message) {
             for(let i = res.rows.length - length; i < res.rows.length; i++) {
                 msg += res.rows[i].nickname + "\n"
             }
+
+            //Print history
+            return message.channel.send(msg);
         }).catch((err) => {
             console.log(err);
             return message.channel.send("Failed to retrieve history");
         });
-
-    //Print history
-    return message.channel.send(msg);
 }
 
 //Join voice channel and play music
