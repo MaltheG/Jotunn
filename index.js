@@ -79,7 +79,7 @@ bot.on("message", async message => {
 function setName(message) {
     const args = message.content.split(' ');
 
-    if(args < 3) {
+    if(args.length < 3) {
         return message.channel.send(`Bad format. Usage: ${prefix}setname [@User] [nickname]`);
     }
 
@@ -118,7 +118,7 @@ function setName(message) {
 function history(message) {
     const args = message.content.split(' ');
 
-    if(args < 2) {
+    if(args.length < 2) {
         return message.channel.send(`Bad format. Usage: ${prefix}history [@User] OPTIONAL[length]`);
     }
 
@@ -128,7 +128,7 @@ function history(message) {
     let length = 5;
 
     //Allow custom history length
-    if(args > 2) {
+    if(args.length > 2) {
         length = parseInt(args[2]);
     }
 
