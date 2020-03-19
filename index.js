@@ -148,6 +148,7 @@ function history(message) {
                 msg += res.rows[i].nickname + "\n"
             }
         }).catch((err) => {
+            console.log("Hej");
             console.log(err);
             return message.channel.send("Failed to retrieve history");
         }).then(client.end());
