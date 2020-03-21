@@ -141,7 +141,7 @@ function history(message) {
             if(length > res.rows.length) {
                 length = res.rows.length;
             }
-            console.log(res);
+
             //Get last n entries
             for(let i = res.rows.length - length; i < res.rows.length; i++) {
                 msg += res.rows[i].nickname + "\n"
@@ -183,8 +183,6 @@ async function execute(message, serverQueue) {
 
     //Get song info from ytdl
     await getInfo("ytsearch:" + message.content.substr(6).trim(), [], true).then((info) => {
-        console.log(info.items);
-        console.log(info);
         song.title = info.items[0].title;
         song.url = info.items[0].webpage_url;
     });
@@ -230,7 +228,6 @@ async function execute(message, serverQueue) {
             serverQueue.playing = true;
             return msg.edit(`Now playing: ${song.title}`);
         }
-        console.log(serverQueue.songs);
         return msg.edit(`${song.title} has been added to the queue!`);
     }
 }
