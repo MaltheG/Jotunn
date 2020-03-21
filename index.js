@@ -169,7 +169,11 @@ async function execute(message, serverQueue) {
         return message.channel.send("I need permission to join and speak in your channel.")
     }
 
-    let msg = message.channel.send("Searching...");
+    let msg;
+
+    message.channel.send("Searching...").then((m) => {
+        msg = m;
+    });
 
     //Create new song object
     const song = {
