@@ -169,6 +169,8 @@ async function execute(message, serverQueue) {
         return message.channel.send("I need permission to join and speak in your channel.")
     }
 
+    let msg = message.channel.send("Searching...");
+
     //Create new song object
     const song = {
         title: null,
@@ -208,11 +210,11 @@ async function execute(message, serverQueue) {
             queueConstruct.connection = await voiceChannel.join();
             //Play music
             play(message.guild, queueConstruct.songs[0]);
-            return message.channel.send(`Now playing: ${song.title}`);
+            return msg.edit(`Now playing: ${song.title}`);
         } catch (err) {
             console.log(err);
             serverMap.delete(message.guild.id);
-            return message.channel.send(err);
+            return msg.edit(err);
         }
     } else {
         //We are already in a voice channel
@@ -222,9 +224,10 @@ async function execute(message, serverQueue) {
         if(!serverQueue.playing) {
             play(message.guild, serverQueue.songs[0]);
             serverQueue.playing = true;
+            return msg.edit(`Now playing: ${song.title}`);
         }
         console.log(serverQueue.songs);
-        return message.channel.send(`${song.title} has been added to the queue!`);
+        return msg.edit(`${song.title} has been added to the queue!`);
     }
 }
 
