@@ -191,10 +191,15 @@ async function execute(message, serverQueue) {
         song.title = info.items[0].title;
         song.url = info.items[0].webpage_url;
         console.log(`Song added: ${song.title}`);
+        console.log(song);
     }).catch((err) => {
         console.log(err);
-        return message.channel.send(`Could not find any song matching ${searchTerm}`);
+        return msg.edit(`Could not find any song matching ${searchTerm}`);
     });
+
+    if(song.title === null || song.url === null) {
+        return msg.edit(`Could not find any song matching ${searchTerm}`)
+    }
 
 
     //Check if we are already connected
@@ -404,7 +409,7 @@ function remove(message, serverQueue) {
         return song.title !== songName;
     });
 
-    //Song(s) were not removed
+    //If length is not changed song(s) were not removed
     if(serverQueue.length === prevLength) {
         return message.channel.send(`Failed to remove ${songName} from the queue`);
     }
