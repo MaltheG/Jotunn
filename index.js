@@ -400,7 +400,7 @@ function remove(message, serverQueue) {
     const prevLength = serverQueue.songs.length;
 
     //Filter songs that match the song name
-    serverQueue.songs.filter(function(song) {
+    serverQueue.songs = serverQueue.songs.filter(function(song) {
         return song.title !== songName;
     });
 
@@ -410,5 +410,5 @@ function remove(message, serverQueue) {
     }
 
     //Song(s) were removed
-    return message.channel.send(`Successfully remove ${songName} from queue`);
+    return message.channel.send(`Successfully removed ${songName} from queue`);
 }
