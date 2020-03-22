@@ -184,10 +184,16 @@ async function execute(message, serverQueue) {
         url: null,
     };
 
+    const searchTerm = message.content.substr(6).trim();
+
     //Get song info from ytdl
-    await getInfo("ytsearch:" + message.content.substr(6).trim(), [], true).then((info) => {
+    await getInfo("ytsearch:" + searchTerm, [], true).then((info) => {
         song.title = info.items[0].title;
         song.url = info.items[0].webpage_url;
+        console.log(`Song added: ${song.title}`);
+    }).catch((err) => {
+        console.log(err);
+        return message.channel.send(`Could not find any song matching ${searchTerm}`);
     });
 
 
@@ -388,10 +394,10 @@ function clear(message, serverQueue) {
 function remove(message, serverQueue) {
     if(!message.member.voice.channel) return message.channel.send("You need to be in a voice channel to edit the queue");
 
-    const songName = message.content.substr(8);
+    const songName = message.content.substr(8).trim();
 
     const prevLength = serverQueue.songs.length;
-    
+
     serverQueue.songs.filter(function(song) {
         return song.title !== songName;
     });
