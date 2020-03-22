@@ -393,18 +393,22 @@ function clear(message, serverQueue) {
 //Removes specific song from queue
 function remove(message, serverQueue) {
     if(!message.member.voice.channel) return message.channel.send("You need to be in a voice channel to edit the queue");
-
+    
+    //Remove ".remove " from message
     const songName = message.content.substr(8).trim();
 
     const prevLength = serverQueue.songs.length;
 
+    //Filter songs that match the song name
     serverQueue.songs.filter(function(song) {
         return song.title !== songName;
     });
 
+    //Song(s) were not removed
     if(serverQueue.length === prevLength) {
         return message.channel.send(`Failed to remove ${songName} from queue`);
     }
 
+    //Song(s) were removed
     return message.channel.send(`Successfully remove ${songName} from queue`);
 }
