@@ -72,6 +72,9 @@ bot.on("message", async message => {
         case "clear":
             clear(message, serverQueue);
             break;
+        case "remove":
+            remove(message, serverQueue);
+            break;
     }
 });
 
@@ -379,4 +382,23 @@ function clear(message, serverQueue) {
     //Clear the queue
     serverQueue.songs = [];
     return message.channel.send("Queue cleared");
+}
+
+//Removes specific song from queue
+function remove(message, serverQueue) {
+    if(!message.member.voice.channel) return message.channel.send("You need to be in a voice channel to edit the queue");
+
+    const songName = message.content.substr(8);
+
+    const prevLength = serverQueue.songs.length;
+    
+    serverQueue.songs.filter(function(song) {
+        return song.title !== songName;
+    });
+
+    if(serverQueue.length === prevLength) {
+        return message.channel.send(`Failed to remove ${songName} from queue`);
+    }
+
+    return message.channel.send(`Successfully remove ${songName} from queue`);
 }
