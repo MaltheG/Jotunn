@@ -406,9 +406,9 @@ function remove(message, serverQueue) {
 
     //Song(s) were not removed
     if(serverQueue.length === prevLength) {
-        return message.channel.send(`Failed to remove ${songName} from queue`);
+        return message.channel.send(`Failed to remove ${songName} from the queue`);
     }
 
     //Song(s) were removed
-    return message.channel.send(`Successfully removed ${songName} from queue`);
+    return message.channel.send(`Successfully removed ${songName} from the queue`);
 }
