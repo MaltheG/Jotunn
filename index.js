@@ -187,10 +187,15 @@ async function execute(message, serverQueue) {
         url: null,
     };
 
-    const searchTerm = message.content.substr(6).trim();
+    const request = message.content.substr(6).trim();
+    let searchTerm = request;
+
+    if(!request.includes("https://")) {
+        searchTerm = "ytsearch:" + searchTerm;
+    }
 
     //Get song info from ytdl
-    await getInfo("ytsearch:" + searchTerm, [], true).then((info) => {
+    await getInfo(searchTerm, [], true).then((info) => {
         song.title = info.items[0].title;
         song.url = info.items[0].webpage_url;
         console.log(`Song added: ${song.title}`);
