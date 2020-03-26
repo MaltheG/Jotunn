@@ -211,7 +211,7 @@ async function execute(message, serverQueue) {
 
 
     //Check if we are already connected
-    if(!serverQueue || !message.guild.voiceConnection) {
+    if(!serverQueue) {
         //If not, create new queueConstruct. This holds all information about current session
         const queueConstruct = {
             textChannel: message.channel,
