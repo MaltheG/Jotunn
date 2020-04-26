@@ -78,8 +78,26 @@ bot.on("message", async message => {
         case "drawmelikeoneofyourfrenchgirls":
             drawMe(message);
             break;
+        case "setafkchannel":
+            setAFKChannel(message);
+            break;
+        case "test":
+            test();
+            break;
     }
 });
+
+function test(){
+    client.connect();
+    client.query(`CREATE TABLE Settings (
+                        ID varchar(128),
+                        Prefix varchar(8),
+                        TimeoutTime int,
+                        AFKMusic int,
+                        AFKChannel varchar(128),
+                        AFKSong varchar(256)
+)`);
+}
 
 //Set nickname of user in channel
 function setName(message) {
@@ -115,6 +133,42 @@ function setName(message) {
         .catch((error) => console.log(error));
 
     return message.channel.send("Successfully changed name")
+}
+
+function modifySettings(message, query) {
+    const serverID = message.guild.id.toString();
+
+    //Check if server already exists in settings table
+    client.connect();
+    client.query(`SELECT 1 FROM Settings WHERE ID=${serverID}`)
+        .then((res) => {
+            //Insert if not present already
+            if(res.rows.length < 1) {
+                client.query(`INSERT INTO Setttings (ID) VALUES('${serverID}')`)
+            }
+        }).catch((err) => {
+            console.log(err);
+            return false;
+        });
+
+    //Send requested query to database
+    client.query(query)
+        .catch((err) => {
+            console.log(err);
+            return false;
+        });
+    return true;
+}
+
+function setAFKChannel(message) {
+    const voiceChannel = message.member.voice.channel;
+    if(!voiceChannel) return message.channel.send("You need to be in a voice channel to play music you dumb dumb.");
+
+    if(modifySettings(message, `INSERT INTO Settings (AFKChannel) VALUES('${voiceChannel.toString()}');`)) {
+        return message.channel.send("Successfully set AFK channel");
+    } else {
+        return message.channel.send("Failed to set AFK channel");
+    }
 }
 
 function history(message) {
