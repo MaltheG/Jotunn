@@ -90,12 +90,17 @@ bot.on("message", async message => {
         case "setafksong":
             setAFKSong(message);
             break;
+        case "forcedc":
+            disconnect(message, serverQueue);
+            break;
+        case "bananton":
+            test(message);
+            break;
     }
 });
 
 function test(message){
-    message.channel.send(message.member.voice.channel.id.toString());
-    joinAFKChannel(message.member.voice.channel.id.toString());
+    getChannel("658166960151986180").then((res) => res.join());
 }
 
 //Set nickname of user in channel
@@ -179,7 +184,7 @@ function setAFKChannel(message) {
 }
 
 function getChannel(channelID) {
-    bot.channels.fetch(channelID).then((res) => { return res });
+    return bot.channels.fetch(channelID);
 }
 
 function toggleAFKMusic(message) {
@@ -240,14 +245,15 @@ async function joinAFKChannel(serverID) {
             if(res.rows[0].afkmusic != 1) return;
             const AFKChannelID = res.rows[0].afkchannel;
             const voiceChannel = getChannel(AFKChannelID);
+            getChannel(AFKChannelID).then((res) => {
+                serverQueue.voiceChannel = res;
+                res.join();
+            });
             songTerm = res.rows[0].afksong;
 
             serverQueue.afk = true;
             serverQueue.loop = true;
             serverQueue.playing = true;
-            serverQueue.voiceChannel = voiceChannel;
-
-            voiceChannel.join();
 
             if(!songTerm.includes("https://")) {
                 songTerm = "ytsearch:" + songTerm;
