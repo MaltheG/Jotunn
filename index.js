@@ -143,7 +143,7 @@ function modifySettings(message, query) {
         .then((res) => {
             //Insert if not present already
             if(res.rows.length < 1) {
-                client.query(`INSERT INTO Setttings (ID) VALUES('${serverID}')`)
+                client.query(`INSERT INTO Settings (ID) VALUES('${serverID}')`)
                     .catch((err) => {
                         console.log("Failed db setup on serverID");
                         console.log(err);
