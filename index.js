@@ -150,6 +150,7 @@ function modifySettings(message, query) {
                     })
             }
         }).catch((err) => {
+            console.log("Failed to read if serverID exists on db");
             console.log(err);
             return false;
         });
@@ -157,6 +158,7 @@ function modifySettings(message, query) {
     //Send requested query to database
     client.query(query)
         .catch((err) => {
+            console.log("Failed to execute " + query);
             console.log(err);
             return false;
         });
