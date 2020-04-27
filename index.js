@@ -55,7 +55,7 @@ bot.on("message", async message => {
             skip(message, serverQueue);
             break;
         case "dc":
-            disconnect(message, serverQueue);
+            joinAFKChannel(message.guild.id);
             break;
         case "volume":
             volume(message, serverQueue);
@@ -82,21 +82,17 @@ bot.on("message", async message => {
             setAFKChannel(message);
             break;
         case "test":
-            test();
+            test(message);
+            break;
+        case "toggleafkmusic":
+            toggleAFKMusic(message);
             break;
     }
 });
 
-function test(){
-    client.connect();
-    client.query(`CREATE TABLE Settings (
-                        ID varchar(128),
-                        Prefix varchar(8),
-                        TimeoutTime int,
-                        AFKMusic int,
-                        AFKChannel varchar(128),
-                        AFKSong varchar(256)
-)`);
+function test(message){
+    message.channel.send(message.member.voice.channel.id.toString());
+    joinAFKChannel(message.member.voice.channel.id.toString());
 }
 
 //Set nickname of user in channel
@@ -161,14 +157,115 @@ function modifySettings(message, query) {
 }
 
 function setAFKChannel(message) {
-    const voiceChannel = message.member.voice.channel;
-    if(!voiceChannel) return message.channel.send("You need to be in a voice channel to play music you dumb dumb.");
+    const serverID = message.guild.id.toString();
+    const voiceChannel = message.member.voice.channel.id;
+    if(!voiceChannel) return message.channel.send("You need to be in channel to set this as the AFK channel");
 
-    if(modifySettings(message, `INSERT INTO Settings (AFKChannel) VALUES('${voiceChannel.toString()}');`)) {
+    if(modifySettings(message, `INSERT INTO Settings (AFKChannel) VALUES('${voiceChannel.toString()}') WHERE ID='${serverID}';`)) {
         return message.channel.send("Successfully set AFK channel");
     } else {
         return message.channel.send("Failed to set AFK channel");
     }
+}
+
+function getChannel(channelID) {
+    bot.channels.fetch(channelID).then((res) => { return res });
+}
+
+function toggleAFKMusic(message) {
+    const serverID = message.guild.id.toString();
+
+    let toggle = 0;
+
+    client.connect();
+    client.query(`SELECT AFKMusic FROM Settings WHERE ID='${serverID}'`)
+        .then((res) => {
+            if(res.rows[0].afkmusic == 0) {
+                toggle = 1;
+            }
+
+            client.query(`INSERT INTO Settings (AFKMusic) VALUES ('${toggle}') WHERE ID='${serverID}'`).catch((err) => {
+            return message.channel.send("Failed to toggle AFKMusic");
+            });
+        }).catch((err) => {
+            return message.channel.send("Failed to toggle AFKMusic");
+    });
+
+    if(toggle === 0){
+        return message.channel.send("AFKMusic is now off");
+    } else {
+        return message.channel.send("AFKMusic is now on");
+    }
+}
+
+function setAFKSong(message) {
+    const serverID = message.guild.id.toString();
+    const searchTerm = message.content.substr(12).trim();
+
+    client.connect();
+    client.query(`INSERT INTO Settings (AFKSong) VALUES ('${searchTerm}') WHERE ID='${serverID}'`)
+        .catch((err) => {
+            console.log("Failed to set afk song: ");
+            console.log(err);
+            return message.channel.send("Failed to set afk song")
+        });
+    return message.channel.send("Successfully set afk song");
+}
+
+async function joinAFKChannel(serverID) {
+    client.connect();
+
+    let songTerm;
+    const serverQueue = serverMap.get(serverID);
+
+    await client.query(`SELECT AFKChannel, AFKSong, AFKMusic FROM Settings WHERE ID='${serverID}'`)
+        .then((res) => {
+            if(res.rows[0].afkmusic != 1) return;
+            const AFKChannelID = res.rows[0].afkchannel;
+            const voiceChannel = getChannel(AFKChannelID);
+            songTerm = res.rows[0].afksong;
+
+            serverQueue.afk = true;
+            serverQueue.loop = true;
+            serverQueue.playing = true;
+            serverQueue.voiceChannel = voiceChannel;
+
+            voiceChannel.join();
+
+            if(!songTerm.includes("https://")) {
+                songTerm = "ytsearch:" + songTerm;
+            }
+        }).catch((err) => {
+            console.log("Failed to fetch afk channel: ");
+            console.log(err);
+    });
+
+    //Create new song object
+    const song = {
+        title: null,
+        url: null,
+    };
+
+    //Get song info from ytdl
+    await getInfo(songTerm, [], true).then((info) => {
+        song.title = info.items[0].title;
+        song.url = info.items[0].webpage_url;
+        console.log(`Song added: ${song.title}`);
+        console.log(song);
+    }).catch((err) => {
+        console.log(err);
+        console.log(`Could not find any song matching ${songTerm}`);
+    });
+
+    if(song.title === null || song.url === null) {
+        console.log(`Could not find any song matching ${songTerm}`)
+    }
+
+    serverQueue.songs[0] = song;
+
+    const guild = bot.guilds.cache.get(serverID);
+
+    play(guild, serverQueue.songs[0]);
 }
 
 function history(message) {
@@ -265,7 +362,7 @@ async function execute(message, serverQueue) {
 
 
     //Check if we are already connected
-    if(!serverQueue) {
+    if(!serverQueue || serverQueue.afk) {
         //If not, create new queueConstruct. This holds all information about current session
         const queueConstruct = {
             textChannel: message.channel,
@@ -275,6 +372,7 @@ async function execute(message, serverQueue) {
             volume: 100,
             playing: true,
             loop: false,
+            afk: false,
         };
 
         //Add this server session to list of all sessions
