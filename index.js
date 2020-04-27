@@ -87,6 +87,9 @@ bot.on("message", async message => {
         case "toggleafkmusic":
             toggleAFKMusic(message);
             break;
+        case "setafksong":
+            setAFKSong(message);
+            break;
     }
 });
 
