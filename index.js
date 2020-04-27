@@ -186,7 +186,7 @@ function toggleAFKMusic(message) {
 
     client.connect();
     client.query(`SELECT AFKMusic FROM Settings WHERE ID='${serverID}'`)
-        .then((res) =>
+        .then((res) => {
             console.log(res);
             if(res.rows[0].afkmusic == 0) {
                 toggle = 1;
