@@ -187,18 +187,22 @@ function toggleAFKMusic(message) {
                 toggle = 1;
             }
 
-            client.query(`INSERT INTO Settings (AFKMusic) VALUES ('${toggle}') WHERE ID='${serverID}'`).catch((err) => {
-            return message.channel.send("Failed to toggle AFKMusic");
+            client.query(`INSERT INTO Settings (AFKMusic) VALUES ('${toggle}') WHERE ID='${serverID}'`)
+                .then(() => {
+                    if(toggle === 0){
+                        return message.channel.send("AFKMusic is now off");
+                    } else {
+                        return message.channel.send("AFKMusic is now on");
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                    return message.channel.send("Failed to toggle AFKMusic");
             });
         }).catch((err) => {
+            console.log(err);
             return message.channel.send("Failed to toggle AFKMusic");
     });
-
-    if(toggle === 0){
-        return message.channel.send("AFKMusic is now off");
-    } else {
-        return message.channel.send("AFKMusic is now on");
-    }
 }
 
 function setAFKSong(message) {
