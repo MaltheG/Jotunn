@@ -247,9 +247,7 @@ async function joinAFKChannel(serverID) {
             const voiceChannel = getChannel(AFKChannelID);
             getChannel(AFKChannelID).then((res) => {
                 serverQueue.voiceChannel = res;
-                res.join().then(() => {
-                    res.members.get(bot.user.id).voice.setMute(false);
-                });
+                res.join();
             });
             songTerm = res.rows[0].afksong;
 
@@ -291,6 +289,8 @@ async function joinAFKChannel(serverID) {
     const guild = bot.guilds.cache.get(serverID);
 
     play(guild, serverQueue.songs[0]);
+
+    serverQueue.voiceChannel.members.get(bot.user.id).voice.setMute(false);
 }
 
 function history(message) {
