@@ -100,7 +100,7 @@ bot.on("message", async message => {
 });
 
 function test(message){
-    getChannel("658166960151986180").then((res) => res.join());
+
 }
 
 //Set nickname of user in channel
@@ -247,7 +247,9 @@ async function joinAFKChannel(serverID) {
             const voiceChannel = getChannel(AFKChannelID);
             getChannel(AFKChannelID).then((res) => {
                 serverQueue.voiceChannel = res;
-                res.join();
+                res.join().then(() => {
+                    res.members.get(bot.user.id).voice.setMute(false);
+                });
             });
             songTerm = res.rows[0].afksong;
 
