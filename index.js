@@ -157,12 +157,13 @@ function modifySettings(message, query) {
 
     //Send requested query to database
     client.query(query)
-        .catch((err) => {
+        .then(() => {
+            return true;
+        }).catch((err) => {
             console.log("Failed to execute " + query);
             console.log(err);
             return false;
         });
-    return true;
 }
 
 function setAFKChannel(message) {
@@ -170,7 +171,7 @@ function setAFKChannel(message) {
     const voiceChannel = message.member.voice.channel.id;
     if(!voiceChannel) return message.channel.send("You need to be in channel to set this as the AFK channel");
 
-    if(modifySettings(message, `INSERT INTO Settings (AFKChannel) VALUES('${voiceChannel.toString()}') WHERE ID='${serverID}';`)) {
+    if(modifySettings(message, `UPDATE Settings SET AFKChannel='${voiceChannel.toString()}' WHERE ID='${serverID}';`)) {
         return message.channel.send("Successfully set AFK channel");
     } else {
         return message.channel.send("Failed to set AFK channel");
@@ -194,7 +195,7 @@ function toggleAFKMusic(message) {
                 toggle = 1;
             }
 
-            client.query(`INSERT INTO Settings (AFKMusic) VALUES ('${toggle}') WHERE ID='${serverID}'`)
+            client.query(`UPDATE Settings SET AFKMusic='${toggle}' WHERE ID='${serverID}'`)
                 .then(() => {
                     if(toggle === 0){
                         return message.channel.send("AFKMusic is now off");
@@ -217,7 +218,7 @@ function setAFKSong(message) {
     const searchTerm = message.content.substr(12).trim();
 
     client.connect();
-    client.query(`INSERT INTO Settings (AFKSong) VALUES ('${searchTerm}') WHERE ID='${serverID}'`)
+    client.query(`UPDATE Settings SET AFKSong='${searchTerm}' WHERE ID='${serverID}'`)
         .then(() => {
             return message.channel.send("Successfully set afk song");
         })
