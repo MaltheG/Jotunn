@@ -182,7 +182,8 @@ function toggleAFKMusic(message) {
 
     client.connect();
     client.query(`SELECT AFKMusic FROM Settings WHERE ID='${serverID}'`)
-        .then((res) => {
+        .then((res) =>
+            console.log(res);
             if(res.rows[0].afkmusic == 0) {
                 toggle = 1;
             }
@@ -211,12 +212,14 @@ function setAFKSong(message) {
 
     client.connect();
     client.query(`INSERT INTO Settings (AFKSong) VALUES ('${searchTerm}') WHERE ID='${serverID}'`)
+        .then(() => {
+            return message.channel.send("Successfully set afk song");
+        })
         .catch((err) => {
             console.log("Failed to set afk song: ");
             console.log(err);
             return message.channel.send("Failed to set afk song")
         });
-    return message.channel.send("Successfully set afk song");
 }
 
 async function joinAFKChannel(serverID) {
