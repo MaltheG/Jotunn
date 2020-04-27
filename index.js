@@ -139,11 +139,15 @@ function modifySettings(message, query) {
 
     //Check if server already exists in settings table
     client.connect();
-    client.query(`SELECT 1 FROM Settings WHERE ID=${serverID}`)
+    client.query(`SELECT 1 FROM Settings WHERE ID='${serverID}'`)
         .then((res) => {
             //Insert if not present already
             if(res.rows.length < 1) {
                 client.query(`INSERT INTO Setttings (ID) VALUES('${serverID}')`)
+                    .catch((err) => {
+                        console.log("Failed db setup on serverID");
+                        console.log(err);
+                    })
             }
         }).catch((err) => {
             console.log(err);
