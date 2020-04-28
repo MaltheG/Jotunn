@@ -342,7 +342,7 @@ async function execute(message, serverQueue) {
     const args = message.content.split(' ');
 
     //Join voice channel if not already joined
-    if(!serverQueue) {
+    if(!serverQueue || serverQueue.afk) {
         await join(message, serverQueue);
         serverQueue = serverMap.get(message.guild.id);
     }
