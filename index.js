@@ -341,6 +341,89 @@ function history(message) {
 async function execute(message, serverQueue) {
     const args = message.content.split(' ');
 
+    //Join voice channel if not already joined
+    if(!serverQueue) {
+        await join(message, serverQueue);
+        serverQueue = serverMap.get(message.guild.id);
+    }
+    //Store searching message for later editing/deletion
+    let msg;
+
+    //Let the user know we read the command
+    message.channel.send("Searching...").then((m) => {
+        msg = m;
+    });
+
+    const request = message.content.substr(6).trim();
+    let searchTerm = request;
+
+    //Check if searchTerm is a link
+    if(!request.includes("https://")) {
+        searchTerm = "ytsearch:" + searchTerm;
+    }
+
+    //Get song info from ytdl
+    getInfo(searchTerm).then((info) => {
+        //Is true for playlists
+        if(info.partial) {
+            info.on('video', (v) => {
+                //Create new song object
+                const song = {
+                    title: v.title,
+                    url: v.webpage_url,
+                };
+
+                //Push song to queue
+                serverQueue.songs.push(song);
+
+                console.log(`Song added: ${song.title}`);
+                console.log(song);
+
+                //We are not already playing a song
+                if(!serverQueue.playing) {
+                    //Play music
+                    play(message.guild, serverQueue.songs[0]);
+                    serverQueue.playing = true;
+                    message.channel.send(`Now playing: ${serverQueue.songs[0].title}`);
+                }
+
+                msg.edit(`Adding songs to queue...`);
+            });
+            info.on('done', () => {
+                return msg.edit(`${info.items.length} songs added to queue`);
+            })
+        } else {
+            //Single song
+            //Create new song object
+            const song = {
+                title: info.items[0].title,
+                url: info.items[0].webpage_url,
+            };
+
+            //Push song to queue
+            serverQueue.songs.push(song);
+
+            console.log(`Song added: ${song.title}`);
+            console.log(song);
+
+            //We are not already playing a song
+            if(!serverQueue.playing) {
+                //Play music
+                play(message.guild, serverQueue.songs[0]);
+                serverQueue.playing = true;
+                return msg.edit(`Now playing: ${serverQueue.songs[0].title}`);
+            } else {
+                return msg.edit(`${song.title} added to queue`);
+            }
+        }
+    }).catch((err) => {
+        console.log(err);
+        return msg.edit(`Could not find any song matching ${searchTerm}`);
+    });
+}
+
+//Join voice channel without playing any music
+async function join(message, serverQueue) {
     //Check if the user is in a voice channel
     const voiceChannel = message.member.voice.channel;
     if(!voiceChannel) return message.channel.send("You need to be in a voice channel to play music you dumb dumb.");
@@ -351,41 +434,6 @@ async function execute(message, serverQueue) {
         return message.channel.send("I need permission to join and speak in your channel.")
     }
 
-    let msg;
-
-    message.channel.send("Searching...").then((m) => {
-        msg = m;
-    });
-
-    //Create new song object
-    const song = {
-        title: null,
-        url: null,
-    };
-
-    const request = message.content.substr(6).trim();
-    let searchTerm = request;
-
-    if(!request.includes("https://")) {
-        searchTerm = "ytsearch:" + searchTerm;
-    }
-
-    //Get song info from ytdl
-    await getInfo(searchTerm, [], true).then((info) => {
-        song.title = info.items[0].title;
-        song.url = info.items[0].webpage_url;
-        console.log(`Song added: ${song.title}`);
-        console.log(song);
-    }).catch((err) => {
-        console.log(err);
-        return msg.edit(`Could not find any song matching ${searchTerm}`);
-    });
-
-    if(song.title === null || song.url === null) {
-        return msg.edit(`Could not find any song matching ${searchTerm}`)
-    }
-
-
     //Check if we are already connected
     if(!serverQueue || serverQueue.afk) {
         //If not, create new queueConstruct. This holds all information about current session
@@ -395,7 +443,7 @@ async function execute(message, serverQueue) {
             connection: null,
             songs: [],
             volume: 100,
-            playing: true,
+            playing: false,
             loop: false,
             afk: false,
         };
@@ -403,63 +451,13 @@ async function execute(message, serverQueue) {
         //Add this server session to list of all sessions
         serverMap.set(message.guild.id, queueConstruct);
 
-        //Push requested song to this sessions queue
-        queueConstruct.songs.push(song);
-
         //Try joining voice channel
         try {
             queueConstruct.connection = await voiceChannel.join();
-            //Play music
-            play(message.guild, queueConstruct.songs[0]);
-            return msg.edit(`Now playing: ${song.title}`);
         } catch (err) {
             console.log(err);
             serverMap.delete(message.guild.id);
             return msg.edit(err);
-        }
-    } else {
-        //We are already in a voice channel
-        //Push song to song queue
-        serverQueue.songs.push(song);
-        //If not playing anything play this song
-        if(!serverQueue.playing) {
-            play(message.guild, serverQueue.songs[0]);
-            serverQueue.playing = true;
-            return msg.edit(`Now playing: ${song.title}`);
-        }
-        return msg.edit(`${song.title} has been added to the queue!`);
-    }
-}
-
-//Join voice channel without playing any music
-async function join(message, serverQueue) {
-    const voiceChannel = message.member.voice.channel;
-    if(!voiceChannel) return message.channel.send("You need to be in a voice channel to play music you dumb dumb.");
-
-    const permissions = voiceChannel.permissionsFor(message.client.user);
-    if(!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
-        return message.channel.send("I need permission to join and speak in your channel.")
-    }
-
-    if(!serverQueue) {
-        const queueConstruct = {
-            textChannel: message.channel,
-            voiceChannel: voiceChannel,
-            connection: null,
-            songs: [],
-            volume: defaultVolume,
-            playing: false,
-            loop: false,
-        };
-
-        serverMap.set(message.guild.id, queueConstruct);
-
-        try {
-            queueConstruct.connection = await voiceChannel.join();
-        } catch (err) {
-            console.log(err);
-            serverMap.delete(message.guild.id);
-            return message.channel.send(err);
         }
     } else {
         return message.channel.send("Already in a voice channel");
