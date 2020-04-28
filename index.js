@@ -559,14 +559,29 @@ function queue(message, serverQueue) {
     //Special message if no songs in queue
     if(serverQueue.songs.length < 1) return message.channel.send("No songs in queue");
 
-    let msg = "";
+    let msg = "Queue: ";
+
+    //Number of songs left to show in queue
+    let leftToShow = serverQueue.songs.length;
 
     //Build queue string
-    serverQueue.songs.forEach((song) => {
-        msg += "\n" + song.title;
-    });
+    for (let song of serverQueue.songs) {
+        //Discord sets a 2000 character message limit
+        if(msg.length + `\n...\n(${leftToShow} more)`.length + `\n${song.title}`.length > 2000) {
+            break;
+        }
+        //Add title to queue string
+        msg += `\n${song.title}`;
 
-    return message.channel.send("Queue: " + msg);
+        leftToShow--;
+    }
+
+    //We were not able to display entire queue
+    if(leftToShow > 0) {
+        msg += `\n...\n(${leftToShow} more)`;
+    }
+
+    return message.channel.send(msg);
 }
 
 //Clears song queue
