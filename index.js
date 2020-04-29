@@ -1,7 +1,6 @@
 const Discord = require('discord.js');
 const {
     prefix,
-    token,
 } = require('./config.json');
 const ytdl = require('ytdl-core');
 const { getInfo } = require('ytdl-getinfo');
@@ -21,6 +20,7 @@ bot.once("ready", () => {
 });
 
 //Login to Discord with token
+const token = process.env.JOTUNN_TOKEN;
 bot.login(token);
 
 //Song queues for servers (ServerID, Construct)
@@ -242,7 +242,12 @@ async function joinAFKChannel(serverID) {
 
     await client.query(`SELECT AFKChannel, AFKSong, AFKMusic FROM Settings WHERE ID='${serverID}'`)
         .then((res) => {
-            if(res.rows[0].afkmusic != 1) return;
+            if(res.rows[0].afkmusic != 1) {
+                const voiceChannel = serverQueue.get(serverID).voiceChannel;
+                voiceChannel.leave();
+                serverQueue.delete(serverID);
+                return;
+            }
             const AFKChannelID = res.rows[0].afkchannel;
             const voiceChannel = getChannel(AFKChannelID);
             getChannel(AFKChannelID).then((res) => {
@@ -505,6 +510,7 @@ function play(guild, song) {
         })
         .on('error', error => {
             console.error(error);
+            play(guild, song);
         });
     dispatcher.setVolumeLogarithmic(serverQueue.volume / defaultVolume);
 }
