@@ -245,7 +245,7 @@ async function joinAFKChannel(serverID) {
             if(res.rows[0].afkmusic != 1) {
                 const voiceChannel = serverQueue.voiceChannel;
                 voiceChannel.leave();
-                serverQueue.delete(serverID);
+                serverMap.delete(serverID);
                 return;
             }
             const AFKChannelID = res.rows[0].afkchannel;
