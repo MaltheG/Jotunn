@@ -243,7 +243,7 @@ async function joinAFKChannel(serverID) {
     await client.query(`SELECT AFKChannel, AFKSong, AFKMusic FROM Settings WHERE ID='${serverID}'`)
         .then((res) => {
             if(res.rows[0].afkmusic != 1) {
-                const voiceChannel = serverQueue.get(serverID).voiceChannel;
+                const voiceChannel = serverQueue.voiceChannel;
                 voiceChannel.leave();
                 serverQueue.delete(serverID);
                 return;
