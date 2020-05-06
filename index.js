@@ -392,10 +392,18 @@ async function execute(message, serverQueue) {
                     message.channel.send(`Now playing: ${serverQueue.songs[0].title}`);
                 }
 
-                msg.edit(`Adding songs to queue...`);
+                if(msg != null) {
+                    msg.edit(`Adding songs to queue...`);
+                } else {
+                    message.channel.send(`Adding songs to queue...`);
+                }
             });
             info.on('done', () => {
-                return msg.edit(`${info.items.length} songs added to queue`);
+                if(msg != null) {
+                    return msg.edit(`${info.items.length} songs added to queue`);
+                } else {
+                    return message.channel.send(`${info.items.length} songs added to queue`);
+                }
             })
         } else {
             //Single song
@@ -416,14 +424,26 @@ async function execute(message, serverQueue) {
                 //Play music
                 play(message.guild, serverQueue.songs[0]);
                 serverQueue.playing = true;
-                return msg.edit(`Now playing: ${serverQueue.songs[0].title}`);
+                if(msg != null) {
+                    return msg.edit(`Now playing: ${serverQueue.songs[0].title}`);
+                } else {
+                    return message.channel.send(`Now playing: ${serverQueue.songs[0].title}`);
+                }
             } else {
-                return msg.edit(`${song.title} added to queue`);
+                if(msg != null) {
+                    return msg.edit(`${song.title} added to queue`);
+                } else {
+                    return message.channel.send(`${song.title} added to queue`);
+                }
             }
         }
     }).catch((err) => {
         console.log(err);
-        return msg.edit(`Could not find any song matching ${searchTerm}`);
+        if(msg != null) {
+            return msg.edit(`Could not find any song matching ${searchTerm}`);
+        } else {
+            return message.channel.send(`Could not find any song matching ${searchTerm}`);
+        }
     });
 }
 
