@@ -240,6 +240,8 @@ async function joinAFKChannel(serverID) {
     let songTerm;
     const serverQueue = serverMap.get(serverID);
 
+    if(!serverQueue) return;
+
     await client.query(`SELECT AFKChannel, AFKSong, AFKMusic FROM Settings WHERE ID='${serverID}'`)
         .then((res) => {
             if(res.rows[0].afkmusic != 1) {
@@ -386,10 +388,16 @@ async function execute(message, serverQueue) {
 
                 //We are not already playing a song
                 if(!serverQueue.playing) {
-                    //Play music
-                    play(message.guild, serverQueue.songs[0]);
-                    serverQueue.playing = true;
-                    message.channel.send(`Now playing: ${serverQueue.songs[0].title}`);
+                    try {
+                        //Play music
+                        play(message.guild, serverQueue.songs[0]);
+                        serverQueue.playing = true;
+                        message.channel.send(`Now playing: ${serverQueue.songs[0].title}`);
+                    } catch (err) {
+                        serverQueue.playing = false;
+                        serverQueue.songs.clear();
+                        execute(message, serverQueue);
+                    }
                 }
 
                 if(msg != null) {
@@ -421,9 +429,15 @@ async function execute(message, serverQueue) {
 
             //We are not already playing a song
             if(!serverQueue.playing) {
-                //Play music
-                play(message.guild, serverQueue.songs[0]);
-                serverQueue.playing = true;
+                try {
+                    //Play music
+                    play(message.guild, serverQueue.songs[0]);
+                    serverQueue.playing = true;
+                } catch(err) {
+                    serverQueue.playing = false;
+                    serverQueue.songs.clear();
+                    execute(message, serverQueue);
+                }
                 if(msg != null) {
                     return msg.edit(`Now playing: ${serverQueue.songs[0].title}`);
                 } else {
