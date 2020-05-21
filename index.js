@@ -390,7 +390,9 @@ async function execute(message, serverQueue) {
                 if(!serverQueue.playing) {
                     try {
                         //Play music
+                        console.log("Trying to play song");
                         play(message.guild, serverQueue.songs[0]);
+                        console.log("Executed play function");
                         serverQueue.playing = true;
                         message.channel.send(`Now playing: ${serverQueue.songs[0].title}`);
                     } catch (err) {
