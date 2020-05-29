@@ -55,7 +55,7 @@ bot.on("message", async message => {
             skip(message, serverQueue);
             break;
         case "dc":
-            joinAFKChannel(message.guild.id);
+            disconnect(message, serverQueue);
             break;
         case "volume":
             volume(message, serverQueue);
@@ -244,7 +244,8 @@ async function joinAFKChannel(serverID) {
 
     await client.query(`SELECT AFKChannel, AFKSong, AFKMusic FROM Settings WHERE ID='${serverID}'`)
         .then((res) => {
-            if(res.rows[0].afkmusic != 1) {
+            if(res.rows[0].afkmusic !== 1) {
+                console.log("leaving");
                 const voiceChannel = serverQueue.voiceChannel;
                 voiceChannel.leave();
                 serverMap.delete(serverID);
@@ -377,7 +378,7 @@ async function execute(message, serverQueue) {
                 //Create new song object
                 const song = {
                     title: v.title,
-                    url: v.webpage_url,
+                    url: v.webpage_url.toString(),
                 };
 
                 //Push song to queue
@@ -420,7 +421,7 @@ async function execute(message, serverQueue) {
             //Create new song object
             const song = {
                 title: info.items[0].title,
-                url: info.items[0].webpage_url,
+                url: info.items[0].webpage_url.toString(),
             };
 
             //Push song to queue

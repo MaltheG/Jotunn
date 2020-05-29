@@ -7,11 +7,11 @@
   "license": "ISC",
   "dependencies": {
     "@discordjs/opus": "^0.1.0",
-    "discord.js": "^12.0.2",
+    "discord.js": "^12.2.0",
     "ffmpeg": "0.0.4",
-    "ffmpeg-static": "^4.0.1",
+    "ffmpeg-static": "^4.2.2",
     "pg": "^7.18.2",
-    "ytdl-core": "^2.0.0",
+    "ytdl-core": "^2.1.5",
     "ytdl-getinfo": "^1.1.0"
   }
 }
