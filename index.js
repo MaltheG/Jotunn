@@ -96,11 +96,42 @@ bot.on("message", async message => {
         case "bananton":
             test(message);
             break;
+        case "playnext":
+            playNext(message, serverQueue);
+            break;
     }
 });
 
 function test(message){
 
+}
+
+async function playNext(message, serverQueue) {
+    const args = message.content.split(' ');
+
+    //Song specified - add this to queue
+    if (args.length > 1) {
+        //Failed to find song - do not mess with song queue
+        execute(message, serverQueue).then((res) => {
+            if(res) moveToFront(message, serverQueue);
+        })
+    } else {
+        moveToFront(message, serverQueue);
+    }
+}
+
+function moveToFront(message, serverQueue) {
+    if(serverQueue.songs.length < 3) {
+        return message.channel.send("Song already next in queue");
+    }
+
+    //Pop song from bottom of queue
+    lastSong = serverQueue.songs.pop();
+
+    //Move last song next in queue
+    serverQueue.songs.splice(1, 0, lastSong);
+
+    return message.channel.send(lastSong.title + " moved to front of queue");
 }
 
 //Set nickname of user in channel
@@ -346,12 +377,16 @@ function history(message) {
 }
 
 //Join voice channel and play music
+//Returns true if successful
 async function execute(message, serverQueue) {
     const args = message.content.split(' ');
 
     //Join voice channel if not already joined
     if(!serverQueue || serverQueue.afk) {
-        await join(message, serverQueue);
+        if(!await join(message, serverQueue)) {
+            //Something went wrong when joining voicechannel
+            return false;
+        }
         serverQueue = serverMap.get(message.guild.id);
     }
     //Store searching message for later editing/deletion
@@ -371,7 +406,7 @@ async function execute(message, serverQueue) {
     }
 
     //Get song info from ytdl
-    getInfo(searchTerm).then((info) => {
+    await getInfo(searchTerm).then((info) => {
         //Is true for playlists
         if(info.partial) {
             info.on('video', (v) => {
@@ -442,38 +477,50 @@ async function execute(message, serverQueue) {
                     execute(message, serverQueue);
                 }
                 if(msg != null) {
-                    return msg.edit(`Now playing: ${serverQueue.songs[0].title}`);
+                    msg.edit(`Now playing: ${serverQueue.songs[0].title}`);
+                    return true;
                 } else {
-                    return message.channel.send(`Now playing: ${serverQueue.songs[0].title}`);
+                    message.channel.send(`Now playing: ${serverQueue.songs[0].title}`);
+                    return true;
                 }
             } else {
                 if(msg != null) {
-                    return msg.edit(`${song.title} added to queue`);
+                    msg.edit(`${song.title} added to queue`);
+                    return true;
                 } else {
-                    return message.channel.send(`${song.title} added to queue`);
+                    message.channel.send(`${song.title} added to queue`);
+                    return true;
                 }
             }
         }
     }).catch((err) => {
         console.log(err);
         if(msg != null) {
-            return msg.edit(`Could not find any song matching ${searchTerm}`);
+            msg.edit(`Could not find any song matching ${searchTerm}`);
+            return false;
         } else {
-            return message.channel.send(`Could not find any song matching ${searchTerm}`);
+            message.channel.send(`Could not find any song matching ${searchTerm}`);
+            return false;
         }
     });
+    return true;
 }
 
 //Join voice channel without playing any music
+//Returns true if successful
 async function join(message, serverQueue) {
     //Check if the user is in a voice channel
     const voiceChannel = message.member.voice.channel;
-    if(!voiceChannel) return message.channel.send("You need to be in a voice channel to play music you dumb dumb.");
+    if(!voiceChannel){
+        await message.channel.send("You need to be in a voice channel to play music you dumb dumb.");
+        return false;
+    }
 
     //Check if the bot has permissions to join/speak in channel
     const permissions = voiceChannel.permissionsFor(message.client.user);
     if(!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
-        return message.channel.send("I need permission to join and speak in your channel.")
+        await message.channel.send("I need permission to join and speak in your channel.")
+        return false;
     }
 
     //Check if we are already connected
@@ -499,11 +546,14 @@ async function join(message, serverQueue) {
         } catch (err) {
             console.log(err);
             serverMap.delete(message.guild.id);
-            return msg.edit(err);
+            await msg.edit(err);
+            return false;
         }
     } else {
-        return message.channel.send("Already in a voice channel");
+        await message.channel.send("Already in a voice channel");
+        return true;
     }
+    return true;
 }
 
 //Skip to next song if any
@@ -651,7 +701,7 @@ function remove(message, serverQueue) {
     });
 
     //If length is not changed song(s) were not removed
-    if(serverQueue.length === prevLength) {
+    if(serverQueue.songs.length === prevLength) {
         return message.channel.send(`Failed to remove ${songName} from the queue`);
     }
 
