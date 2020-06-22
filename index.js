@@ -60,6 +60,7 @@ bot.on("message", async message => {
         case "volume":
             volume(message, serverQueue);
             break;
+        case "ben":
         case "earrape":
             earRape(message, serverQueue);
             break;
@@ -96,8 +97,13 @@ bot.on("message", async message => {
         case "bananton":
             test(message);
             break;
+        case "tofront":
         case "playnext":
             playNext(message, serverQueue);
+            break;
+        case "np":
+        case "nowplaying":
+            nowPlaying(message, serverQueue);
             break;
     }
 });
@@ -111,7 +117,7 @@ async function playNext(message, serverQueue) {
 
     //Song specified - add this to queue
     if (args.length > 1) {
-        //Failed to find song - do not mess with song queue
+        //Only mess with queue if successfully found song
         execute(message, serverQueue).then((res) => {
             if(res) moveToFront(message, serverQueue);
         })
@@ -649,6 +655,8 @@ function loop(message, serverQueue) {
 function queue(message, serverQueue) {
     if(!message.member.voice.channel) return message.channel.send("You have to be in a voice channel to view the queue");
 
+    if(!serverQueue) return message.channel.send("Not currently in a channel");
+
     //Special message if no songs in queue
     if(serverQueue.songs.length < 1) return message.channel.send("No songs in queue");
 
@@ -707,6 +715,14 @@ function remove(message, serverQueue) {
 
     //Song(s) were removed
     return message.channel.send(`Successfully removed ${songName} from the queue`);
+}
+
+function nowPlaying(message, serverQueue) {
+    if(!serverQueue) return message.channel.send("Not currently in a channel");
+
+    if(serverQueue.songs.length < 1) return message.channel.send("Nothing is playing currently");
+
+    return message.channel.send("Currently playing: " + serverQueue.songs[0].title);
 }
 
 function drawMe(message) {
