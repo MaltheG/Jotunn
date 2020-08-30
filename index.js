@@ -26,6 +26,10 @@ bot.login(token);
 //Song queues for servers (ServerID, Construct)
 const serverMap = new Map();
 
+const {
+  JOTUNN_IDLE_TIME = 60000,
+} = process.env;
+
 bot.on("message", async message => {
     //Owner of message is bot
     if(message.author.bot) return;
@@ -586,6 +590,8 @@ function play(guild, song) {
     //No song to play, so just return
     if(!song) {
         serverQueue.playing = false;
+        console.log("Nothing left! Starting idle timer...");
+        setIdleTimeout(guild, serverQueue);
         return;
     }
 
@@ -755,4 +761,16 @@ function drawMe(message) {
         "         ,*///((((((((((((///////////////******///***,,,*/((////\n" +
         "          ,****//////////////////*******/////////**,,,,,********\n" +
         "             ...,,,,,***/////**********//////////****,,,,,,,..,.``")
+}
+
+let idleTimeout;
+function setIdleTimeout(guild, serverQueue) {
+  clearTimeout(idleTimeout);
+
+  idleTimeout = setTimeout(() => {
+    console.log("Disconnecting b/c of idle time!");
+
+    serverQueue.voiceChannel.leave();
+    serverMap.delete(guild.id);
+  }, JOTUNN_IDLE_TIME * 1000);
 }
