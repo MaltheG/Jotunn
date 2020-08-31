@@ -27,7 +27,7 @@ bot.login(token);
 const serverMap = new Map();
 
 const {
-  JOTUNN_IDLE_TIME = 60000,
+  JOTUNN_IDLE_TIME = 3600,
 } = process.env;
 
 bot.on("message", async message => {
