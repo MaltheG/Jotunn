@@ -11,7 +11,7 @@
     "ffmpeg": "0.0.4",
     "ffmpeg-static": "^4.2.6",
     "pg": "^7.18.2",
-    "ytdl-core": "^3.2.0",
+    "ytdl-core": "^3.4.2",
     "ytdl-getinfo": "^1.1.0"
   }
 }
