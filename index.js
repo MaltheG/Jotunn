@@ -84,20 +84,8 @@ bot.on("message", async message => {
         case "drawmelikeoneofyourfrenchgirls":
             drawMe(message);
             break;
-        case "setafkchannel":
-            setAFKChannel(message);
-            break;
         case "test":
             test(message);
-            break;
-        case "toggleafkmusic":
-            toggleAFKMusic(message);
-            break;
-        case "setafksong":
-            setAFKSong(message);
-            break;
-        case "forcedc":
-            disconnect(message, serverQueue);
             break;
         case "bananton":
             test(message);
@@ -137,7 +125,7 @@ function moveToFront(message, serverQueue) {
     }
 
     //Pop song from bottom of queue
-    lastSong = serverQueue.songs.pop();
+    let lastSong = serverQueue.songs.pop();
 
     //Move last song next in queue
     serverQueue.songs.splice(1, 0, lastSong);
@@ -179,168 +167,6 @@ function setName(message) {
         .catch((error) => console.log(error));
 
     return message.channel.send("Successfully changed name")
-}
-
-function modifySettings(message, query) {
-    const serverID = message.guild.id.toString();
-
-    //Check if server already exists in settings table
-    client.connect();
-    client.query(`SELECT 1 FROM Settings WHERE ID='${serverID}'`)
-        .then((res) => {
-            //Insert if not present already
-            if(res.rows.length < 1) {
-                client.query(`INSERT INTO Settings (ID) VALUES('${serverID}')`)
-                    .catch((err) => {
-                        console.log("Failed db setup on serverID");
-                        console.log(err);
-                    })
-            }
-        }).catch((err) => {
-            console.log("Failed to read if serverID exists on db");
-            console.log(err);
-            return false;
-        });
-
-    //Send requested query to database
-    client.query(query)
-        .then(() => {
-            return true;
-        }).catch((err) => {
-            console.log("Failed to execute " + query);
-            console.log(err);
-            return false;
-        });
-}
-
-function setAFKChannel(message) {
-    const serverID = message.guild.id.toString();
-    const voiceChannel = message.member.voice.channel.id;
-    if(!voiceChannel) return message.channel.send("You need to be in channel to set this as the AFK channel");
-
-    if(modifySettings(message, `UPDATE Settings SET AFKChannel='${voiceChannel.toString()}' WHERE ID='${serverID}';`)) {
-        return message.channel.send("Successfully set AFK channel");
-    } else {
-        return message.channel.send("Failed to set AFK channel");
-    }
-}
-
-function getChannel(channelID) {
-    return bot.channels.fetch(channelID);
-}
-
-function toggleAFKMusic(message) {
-    const serverID = message.guild.id.toString();
-
-    let toggle = 0;
-
-    client.connect();
-    client.query(`SELECT AFKMusic FROM Settings WHERE ID='${serverID}'`)
-        .then((res) => {
-            console.log(res);
-            if(res.rows[0].afkmusic == 0) {
-                toggle = 1;
-            }
-
-            client.query(`UPDATE Settings SET AFKMusic='${toggle}' WHERE ID='${serverID}'`)
-                .then(() => {
-                    if(toggle === 0){
-                        return message.channel.send("AFKMusic is now off");
-                    } else {
-                        return message.channel.send("AFKMusic is now on");
-                    }
-                })
-                .catch((err) => {
-                    console.log(err);
-                    return message.channel.send("Failed to toggle AFKMusic");
-            });
-        }).catch((err) => {
-            console.log(err);
-            return message.channel.send("Failed to toggle AFKMusic");
-    });
-}
-
-function setAFKSong(message) {
-    const serverID = message.guild.id.toString();
-    const searchTerm = message.content.substr(12).trim();
-
-    client.connect();
-    client.query(`UPDATE Settings SET AFKSong='${searchTerm}' WHERE ID='${serverID}'`)
-        .then(() => {
-            return message.channel.send("Successfully set afk song");
-        })
-        .catch((err) => {
-            console.log("Failed to set afk song: ");
-            console.log(err);
-            return message.channel.send("Failed to set afk song")
-        });
-}
-
-async function joinAFKChannel(serverID) {
-    client.connect();
-
-    let songTerm;
-    const serverQueue = serverMap.get(serverID);
-
-    if(!serverQueue) return;
-
-    await client.query(`SELECT AFKChannel, AFKSong, AFKMusic FROM Settings WHERE ID='${serverID}'`)
-        .then((res) => {
-            if(res.rows[0].afkmusic !== 1) {
-                console.log("leaving");
-                const voiceChannel = serverQueue.voiceChannel;
-                voiceChannel.leave();
-                serverMap.delete(serverID);
-                return;
-            }
-            const AFKChannelID = res.rows[0].afkchannel;
-            const voiceChannel = getChannel(AFKChannelID);
-            getChannel(AFKChannelID).then((res) => {
-                serverQueue.voiceChannel = res;
-                res.join();
-            });
-            songTerm = res.rows[0].afksong;
-
-            serverQueue.afk = true;
-            serverQueue.loop = true;
-            serverQueue.playing = true;
-
-            if(!songTerm.includes("https://")) {
-                songTerm = "ytsearch:" + songTerm;
-            }
-        }).catch((err) => {
-            console.log("Failed to fetch afk channel: ");
-            console.log(err);
-    });
-
-    //Create new song object
-    const song = {
-        title: null,
-        url: null,
-    };
-
-    //Get song info from ytdl
-    await getInfo(songTerm, [], true).then((info) => {
-        song.title = info.items[0].title;
-        song.url = info.items[0].webpage_url;
-        console.log(`Song added: ${song.title}`);
-        console.log(song);
-    }).catch((err) => {
-        console.log(err);
-        console.log(`Could not find any song matching ${songTerm}`);
-    });
-
-    if(song.title === null || song.url === null) {
-        console.log(`Could not find any song matching ${songTerm}`)
-    }
-
-    serverQueue.songs[0] = song;
-
-    const guild = bot.guilds.cache.get(serverID);
-
-    play(guild, serverQueue.songs[0]);
-
-    serverQueue.voiceChannel.members.get(bot.user.id).voice.setMute(false);
 }
 
 function history(message) {
