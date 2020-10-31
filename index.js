@@ -3,7 +3,8 @@ const {
     prefix,
 } = require('./config.json');
 const ytdl = require('ytdl-core');
-const { getInfo } = require('ytdl-getinfo');
+const ytsr = require('ytsr');
+
 const { Client } = require('pg');
 
 //Database client
@@ -386,6 +387,80 @@ function history(message) {
         });
 }
 
+async function getSong(searchTerm) {
+    const err = {
+        msg: null,
+        error: null,
+    };
+
+    class song {
+        title;
+        url;
+
+        constructor(title, url) {
+            this.title = title;
+            this.url = url;
+        }
+    }
+
+    const result = {
+        observers: {},
+
+        on(eventName, observer) {
+            if(!this.observers[eventName]){
+                this.observers[eventName] = [];
+            }
+
+            this.observers[eventName].push(observer)
+        },
+
+        emit(eventName, object) {
+            for (const observer of this.observers[eventName]) {
+                observer(object)
+            }
+        }
+    };
+
+    if(searchTerm.includes("https://")) {
+        //Use getInfo()
+        ytdl.getInfo(searchTerm).then(info => {
+            console.log(info);
+            song.title = info.videoDetails.title;
+            song.url = info.videoDetails.video_url;
+            result.emit('video', song);
+            result.emit('done', null)
+        }).catch(error => {
+            err.msg = "Something went wrong.";
+            err.error = error;
+            result.emit('error', err);
+        })
+    } else {
+        const options = {
+            limit: 1,
+        };
+
+        ytsr(searchTerm, options).then(info => {
+            if(info.items.length < 1) {
+                err.msg = `Found no matches on "${searchTerm}".`;
+                result.emit('error', err);
+            } else {
+                const video = info.items[0];
+                let s = new song();
+                s.title = video.title;
+                s.url = video.link;
+
+                result.emit('video', s);
+                result.emit('done', null)
+            }
+        }).catch(error => {
+            err.msg = "Something went wrong.";
+            err.error = error;
+            result.emit('error', err);
+        })
+    }
+    return result
+}
+
 //Join voice channel and play music
 //Returns true if successful
 async function execute(message, serverQueue) {
@@ -407,113 +482,55 @@ async function execute(message, serverQueue) {
         msg = m;
     });
 
-    const request = message.content.substr(6).trim();
-    let searchTerm = request;
+    let searchTerm = message.content.substr(6).trim();
 
-    //Check if searchTerm is a link
-    if(!request.includes("https://")) {
-        searchTerm = "ytsearch:" + searchTerm;
-    }
+    let result = await getSong(searchTerm);
 
-    //Get song info from ytdl
-    await getInfo(searchTerm).then((info) => {
-        //Is true for playlists
-        if(info.partial) {
-            info.on('video', (v) => {
-                //Create new song object
-                const song = {
-                    title: v.title,
-                    url: v.webpage_url.toString(),
-                };
+    //Get song info
+    result.on('video', song => {
+        //Push song to queue
+        serverQueue.songs.push(song);
 
-                //Push song to queue
-                serverQueue.songs.push(song);
+        console.log(`Song added: ${song.title}`);
+        console.log(song);
 
-                console.log(`Song added: ${song.title}`);
-                console.log(song);
-
-                //We are not already playing a song
-                if(!serverQueue.playing) {
-                    try {
-                        //Play music
-                        console.log("Trying to play song");
-                        play(message.guild, serverQueue.songs[0]);
-                        console.log("Executed play function");
-                        serverQueue.playing = true;
-                        message.channel.send(`Now playing: ${serverQueue.songs[0].title}`);
-                    } catch (err) {
-                        serverQueue.playing = false;
-                        serverQueue.songs.clear();
-                        execute(message, serverQueue);
-                    }
-                }
-
-                if(msg != null) {
-                    msg.edit(`Adding songs to queue...`);
-                } else {
-                    message.channel.send(`Adding songs to queue...`);
-                }
-            });
-            info.on('done', () => {
-                if(msg != null) {
-                    return msg.edit(`${info.items.length} songs added to queue`);
-                } else {
-                    return message.channel.send(`${info.items.length} songs added to queue`);
-                }
-            })
-        } else {
-            //Single song
-            //Create new song object
-            const song = {
-                title: info.items[0].title,
-                url: info.items[0].webpage_url.toString(),
-            };
-
-            //Push song to queue
-            serverQueue.songs.push(song);
-
-            console.log(`Song added: ${song.title}`);
-            console.log(song);
-
-            //We are not already playing a song
-            if(!serverQueue.playing) {
-                try {
-                    //Play music
-                    play(message.guild, serverQueue.songs[0]);
-                    serverQueue.playing = true;
-                } catch(err) {
-                    serverQueue.playing = false;
-                    serverQueue.songs.clear();
-                    execute(message, serverQueue);
-                }
-                if(msg != null) {
-                    msg.edit(`Now playing: ${serverQueue.songs[0].title}`);
-                    return true;
-                } else {
-                    message.channel.send(`Now playing: ${serverQueue.songs[0].title}`);
-                    return true;
-                }
+        //We are not already playing a song
+        if(!serverQueue.playing) {
+            try {
+                //Play music
+                play(message.guild, serverQueue.songs[0]);
+                serverQueue.playing = true;
+            } catch(err) {
+                serverQueue.playing = false;
+                serverQueue.songs.clear();
+                execute(message, serverQueue);
+            }
+            if(msg != null) {
+                msg.edit(`Now playing: ${serverQueue.songs[0].title}`);
             } else {
-                if(msg != null) {
-                    msg.edit(`${song.title} added to queue`);
-                    return true;
-                } else {
-                    message.channel.send(`${song.title} added to queue`);
-                    return true;
-                }
+                message.channel.send(`Now playing: ${serverQueue.songs[0].title}`);
+            }
+        } else {
+            if(msg != null) {
+                msg.edit(`${song.title} added to queue`);
+            } else {
+                message.channel.send(`${song.title} added to queue`);
             }
         }
-    }).catch((err) => {
+    });
+
+    result.on('error', err => {
         console.log(err);
         if(msg != null) {
-            msg.edit(`Could not find any song matching ${searchTerm}`);
+            msg.edit(`${err.msg} Err: ${err.error}`);
             return false;
         } else {
-            message.channel.send(`Could not find any song matching ${searchTerm}`);
+            message.channel.send(`${err.msg} Err: ${err.error}`);
             return false;
         }
     });
-    return true;
+
+    result.on('done', () => {return true});
 }
 
 //Join voice channel without playing any music
