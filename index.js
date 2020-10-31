@@ -4,6 +4,7 @@ const {
 } = require('./config.json');
 const ytdl = require('ytdl-core');
 const ytsr = require('ytsr');
+const ytpl = require('ytpl');
 
 const { Client } = require('pg');
 
@@ -231,6 +232,7 @@ async function getSong(searchTerm) {
 
     const result = {
         observers: {},
+        playlist: false,
 
         on(eventName, observer) {
             if(!this.observers[eventName]){
@@ -248,18 +250,38 @@ async function getSong(searchTerm) {
     };
 
     if(searchTerm.includes("https://")) {
-        //Use getInfo()
-        ytdl.getInfo(searchTerm).then(info => {
-            console.log(info);
-            song.title = info.videoDetails.title;
-            song.url = info.videoDetails.video_url;
-            result.emit('video', song);
+
+        //Do quick check if playlist
+        await ytpl.getPlaylistID(searchTerm).then(() =>{
+            result.playlist = true;
+        }).catch(() => {
+            result.playlist = false;
+        });
+
+        const options = {
+            limit: Infinity,
+        };
+
+        ytpl(searchTerm, options).then(res => {
+            //Link is playlist
+            let item;
+            for (item of res.items) {
+                let s = new song(item.title, item.url_simple);
+                result.emit('video', s)
+            }
             result.emit('done', null)
-        }).catch(error => {
-            err.msg = "Something went wrong.";
-            err.error = error;
-            result.emit('error', err);
-        })
+        }).catch(err => {
+            //Link is not playlist
+            ytdl.getInfo(searchTerm).then(info => {
+                let s = new song(info.videoDetails.title, info.videoDetails.video_url);
+                result.emit('video', s);
+                result.emit('done', null)
+            }).catch(error => {
+                err.msg = "Something went wrong.";
+                err.error = error;
+                result.emit('error', err);
+            })
+        });
     } else {
         const options = {
             limit: 1,
@@ -271,9 +293,7 @@ async function getSong(searchTerm) {
                 result.emit('error', err);
             } else {
                 const video = info.items[0];
-                let s = new song();
-                s.title = video.title;
-                s.url = video.link;
+                let s = new song(video.title, video.link);
 
                 result.emit('video', s);
                 result.emit('done', null)
@@ -312,6 +332,8 @@ async function execute(message, serverQueue) {
 
     let result = await getSong(searchTerm);
 
+    let songAmount = 0;
+
     //Get song info
     result.on('video', song => {
         //Push song to queue
@@ -319,6 +341,7 @@ async function execute(message, serverQueue) {
 
         console.log(`Song added: ${song.title}`);
         console.log(song);
+
 
         //We are not already playing a song
         if(!serverQueue.playing) {
@@ -329,18 +352,28 @@ async function execute(message, serverQueue) {
             } catch(err) {
                 serverQueue.playing = false;
                 serverQueue.songs.clear();
-                execute(message, serverQueue);
+                return execute(message, serverQueue);
             }
-            if(msg != null) {
+            if(msg != null && !result.playlist) {
                 msg.edit(`Now playing: ${serverQueue.songs[0].title}`);
             } else {
                 message.channel.send(`Now playing: ${serverQueue.songs[0].title}`);
             }
+
+            if(result.playlist) {
+                songAmount++;
+            }
         } else {
-            if(msg != null) {
-                msg.edit(`${song.title} added to queue`);
-            } else {
-                message.channel.send(`${song.title} added to queue`);
+            if(result.playlist) {
+                songAmount++;
+            }
+
+            if(!result.playlist) {
+                if (msg != null) {
+                    msg.edit(`${song.title} added to queue`);
+                } else {
+                    message.channel.send(`${song.title} added to queue`);
+                }
             }
         }
     });
@@ -356,7 +389,16 @@ async function execute(message, serverQueue) {
         }
     });
 
-    result.on('done', () => {return true});
+    result.on('done', () => {
+        if(result.playlist) {
+            if (msg != null) {
+                msg.edit(`${songAmount} videos added to queue`);
+            } else {
+                message.channel.send(`${songAmount} videos added to queue`);
+            }
+        }
+        return true
+    });
 }
 
 //Join voice channel without playing any music
