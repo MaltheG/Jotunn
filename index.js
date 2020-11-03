@@ -152,12 +152,18 @@ function setName(message) {
         return message.channel.send("<@!" + userID + "> er en pølse");
     }
 
+    if(nickname.length > 32) {
+        return message.channel.send("Name must not be longer than 32 characters")
+    }
+
     //Change nickname
     message.guild.member(userID).setNickname(nickname).then((member) => {
         //Check if success
         if(member.nickname !== nickname) {
             return message.channel.send("Failed to change name");
         }
+    }).catch(err => {
+        return message.channel.send("Failed to change name. " + err);
     });
 
     //Connect to database
