@@ -54,9 +54,13 @@ bot.on("message", async message => {
         case "join":
             join(message, serverQueue);
             break;
+        case "p":
         case "play":
             execute(message, serverQueue);
             break;
+        case "n":
+        case "s":
+        case "next":
         case "skip":
             skip(message, serverQueue);
             break;
@@ -70,12 +74,15 @@ bot.on("message", async message => {
         case "earrape":
             earRape(message, serverQueue);
             break;
+        case "l":
         case "loop":
             loop(message, serverQueue);
             break;
+        case "q":
         case "queue":
             queue(message, serverQueue);
             break;
+        case "c":
         case "clear":
             clear(message, serverQueue);
             break;
@@ -91,6 +98,8 @@ bot.on("message", async message => {
         case "bananton":
             test(message);
             break;
+        case "pn":
+        case "tf":
         case "tofront":
         case "playnext":
             playNext(message, serverQueue);
@@ -272,7 +281,8 @@ async function getSong(searchTerm) {
             //Link is playlist
             let item;
             for (item of res.items) {
-                let s = new song(item.title, item.url_simple);
+                console.log(item);
+                let s = new song(item.title, item.url);
                 result.emit('video', s)
             }
             result.emit('done', null)
@@ -299,7 +309,8 @@ async function getSong(searchTerm) {
                 result.emit('error', err);
             } else {
                 const video = info.items[0];
-                let s = new song(video.title, video.link);
+                console.log(video)
+                let s = new song(video.title, video.url);
 
                 result.emit('video', s);
                 result.emit('done', null)
@@ -334,7 +345,7 @@ async function execute(message, serverQueue) {
         msg = m;
     });
 
-    let searchTerm = message.content.substr(6).trim();
+    let searchTerm = message.content.substr(message.content.indexOf(' ') + 1).trim();
 
     let result = await getSong(searchTerm);
 
