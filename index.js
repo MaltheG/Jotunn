@@ -488,7 +488,6 @@ function disconnect(message, serverQueue) {
 function play(guild, song) {
     //Get this server's music session data
     const serverQueue = serverMap.get(guild.id);
-    setIdleTimeout(guild, serverQueue);
     //No song to play, so just return
     if(!song) {
         serverQueue.playing = false;
@@ -496,6 +495,8 @@ function play(guild, song) {
         setIdleTimeout(guild, serverQueue);
         return;
     }
+
+    setIdleTimeout(guild, serverQueue);
 
     //Create dispatcher to play song from ytdl
     const dispatcher = serverQueue.connection.play(ytdl(song.url, {
