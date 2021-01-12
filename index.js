@@ -488,7 +488,7 @@ function disconnect(message, serverQueue) {
 function play(guild, song) {
     //Get this server's music session data
     const serverQueue = serverMap.get(guild.id);
-
+    setIdleTimeout(guild, serverQueue);
     //No song to play, so just return
     if(!song) {
         serverQueue.playing = false;
