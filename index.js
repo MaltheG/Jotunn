@@ -6,6 +6,8 @@ const ytdl = require('ytdl-core');
 const ytsr = require('ytsr');
 const ytpl = require('ytpl');
 
+const { joinVoiceChannel } = require('@discordjs/voice');
+
 const { Client } = require('pg');
 
 //Database client
@@ -14,7 +16,7 @@ const client = new Client({
     ssl: true,
 });
 
-const bot = new Discord.Client();
+const bot = new Discord.Client({intents: ["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES", "GUILD_VOICE_STATES"]});
 const defaultVolume = 100;
 
 bot.once("ready", () => {
@@ -22,7 +24,7 @@ bot.once("ready", () => {
 });
 
 //Login to Discord with token
-const token = process.env.JOTUNN_TOKEN;
+const token = "NjUzOTk0NTYxMzE5NzMxMjAw.Xe_F5g.aekK5m2FMYxURh-jHoEFwri5bp8" //process.env.JOTUNN_TOKEN;
 bot.login(token);
 
 //Song queues for servers (ServerID, Construct)
