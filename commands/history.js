@@ -25,7 +25,7 @@ module.exports = async function history(message){
     let authorHistory = "";
     let timeHistory = "";
 
-    db.query(`SELECT Nickname, Namer, TO_CHAR(Time :: DATE, 'dd-mm-yyyy') FROM History WHERE UserID=$1;`, [userID])
+    db.query(`SELECT Nickname, Namer, TO_CHAR(Time :: DATE, 'dd-mm-yyyy') as Time FROM History WHERE UserID=$1;`, [userID])
         .then(res => {
 
             if(res.rows.length < 1){
