@@ -1,5 +1,6 @@
 const {Client, Intents} = require("discord.js");
 const {prefix} = require("./config.json");
+const dbsetup = require("./dbsetup.js");
 
 const setName = require("./commands/setName.js");
 const join = require("./commands/join.js");
@@ -17,6 +18,9 @@ const nowPlaying = require("./commands/nowPlaying.js");
 const history = require("./commands/history.js");
 const {getSongHistory} = require("./commands/songHistory.js");
 const {addSoundCommand, playSoundEffect} = require("./commands/customCommand");
+
+//Init database
+dbsetup();
 
 const bot = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES]});
 

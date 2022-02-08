@@ -1,1 +1,1 @@
-worker: node dbsetup.js
+worker: node index.js
