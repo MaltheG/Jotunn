@@ -1,6 +1,7 @@
 const {Client, Intents} = require("discord.js");
 const {prefix} = require("./config.json");
 const dbsetup = require("./dbsetup.js");
+const guildData = require("./guildData.js");
 
 const setName = require("./commands/setName.js");
 const join = require("./commands/join.js");
@@ -18,6 +19,7 @@ const nowPlaying = require("./commands/nowPlaying.js");
 const history = require("./commands/history.js");
 const {getSongHistory} = require("./commands/songHistory.js");
 const {addSoundCommand, playSoundEffect} = require("./commands/customCommand");
+const {getVoiceConnection} = require("@discordjs/voice");
 
 //Init database
 dbsetup();
@@ -108,3 +110,30 @@ bot.on("messageCreate", async message => {
             break;
     }
 })
+
+//Idle timer. Leave voice channel if no user for 30 seconds
+bot.on('voiceStateUpdate', (oldState, newState) => {
+    if(oldState.channelId !== oldState.guild.me.voice.channelId || newState.channel){
+        return;
+    }
+
+    if(!(oldState.channel.members.size - 1)){
+        setTimeout(() => {
+            if(!(oldState.channel.members.size - 1)){
+                const guildID = oldState.guild.id;
+
+                const connection = getVoiceConnection(guildID);
+                if(connection){
+                    connection.destroy();
+                }
+
+                const audioPlayer = guildData.getServerQueue(guildID).audioPlayer;
+                if(audioPlayer){
+                    audioPlayer.stop();
+                }
+
+                guildData.removeServerQueue(guildID);
+            }
+        }, 30000);
+    }
+});

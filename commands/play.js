@@ -1,6 +1,5 @@
 const {getVoiceConnection, createAudioResource, AudioPlayerStatus} = require("@discordjs/voice");
-const ytsr = require("ytsr");
-const ytdl = require("ytdl-core");
+const pl = require("play-dl");
 
 const guildData = require("../guildData.js");
 const join = require("./join.js");
@@ -9,29 +8,68 @@ const {addSongRequest, addSongPlay} = require("./songHistory.js");
 
 function getSong(query){
     return new Promise((resolve, reject) => {
-        ytsr(query, {limit: 1})
-            .then(result => {
+        //First check if query is url
+        if(query.startsWith("https")){
+            //Check if youtube link:
+            if(pl.yt_validate(query) === "video"){
+                pl.video_basic_info(query).then(res => {
+                    const videoResult = res.video_details;
 
-                if(result.items.length < 1) {
-                    console.log("No results from query");
-                    reject("No results from query");
+                    const song = {
+                        title: videoResult.title,
+                        url: videoResult.url,
+                        id: videoResult.id,
+                        duration: videoResult.durationRaw,
+                        thumbnail: videoResult.thumbnails.pop().url,
+                    }
+
+                    resolve(song);
+                }).catch(err => {
+                    console.log(err);
+                    reject(err);
+                });
+            }
+
+            //Check if spotify link
+            if(pl.sp_validate(query) === "track"){
+                reject("Jeg skal nok tilføje det, okay :(");
+            }
+
+            //Check if soundcloud link
+            pl.so_validate(query).then(res => {
+                if(res.type === "track"){
+                    reject("Jeg skal nok tilføje det, okay :(");
                 }
-
-                const videoResult = result.items[0];
-
-                const song = {
-                    title: videoResult.title,
-                    url: videoResult.url,
-                    id: videoResult.id,
-                    duration: videoResult.duration,
-                    thumbnail: videoResult.bestThumbnail.url,
-                }
-
-                resolve(song);
             }).catch(err => {
+                reject("Jeg skal nok tilføje det, okay :(");
+            })
+
+
+        } else {
+            pl.search(query, {limit: 1})
+                .then(result => {
+
+                    if(result.length < 1) {
+                        console.log("No results from query");
+                        reject("No results from query");
+                    }
+
+                    const videoResult = result[0];
+
+                    const song = {
+                        title: videoResult.title,
+                        url: videoResult.url,
+                        id: videoResult.id,
+                        duration: videoResult.durationRaw,
+                        thumbnail: videoResult.thumbnails.pop().url,
+                    }
+
+                    resolve(song);
+                }).catch(err => {
                 console.log(err);
                 reject(err);
-        });
+            });
+        }
     })
 }
 
@@ -44,10 +82,9 @@ async function playSong(guildID, retry){
         return
     }
 
-    const resource = createAudioResource(ytdl(song.url, {
-        filter: "audioonly",
-        highWaterMark: 1<<20, //We need a higher than usual buffer or else songs will end prematurely
-    }));
+    const source = await pl.stream(song.url);
+
+    const resource = createAudioResource(source.stream, {inputType: source.type});
 
     const audioPlayer = serverQueue.audioPlayer;
 

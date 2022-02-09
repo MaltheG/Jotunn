@@ -1,6 +1,6 @@
 {
   "name": "jotunn",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "The Best Bot",
   "main": "index.js",
   "author": "Jalthe",
@@ -13,7 +13,6 @@
     "libsodium-wrappers": "^0.7.9",
     "node-fetch": "^3.2.0",
     "pg": "^8.7.1",
-    "ytdl-core": "^4.10.0",
-    "ytsr": "^3.6.0"
+    "play-dl": "^1.8.7"
   }
 }

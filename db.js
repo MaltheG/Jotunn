@@ -11,6 +11,8 @@ host: "localhost",
 database: "JotunnDev",
 password: "admin",
 port: "5432",
+
+DATABASE_URL=postgressql://postgres:admin@localhost:5432/JotunnDev JOTUNN_TOKEN=NzY5NzA5Mzc3Mzg0MDg3NTcy.X5S9uA.k975j_t2ZS0zQwUhq-nbTwDGHsE node index.js
 */
 
 module.exports = {

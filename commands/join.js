@@ -1,5 +1,5 @@
 const guildData = require("../guildData.js");
-const {joinVoiceChannel, createAudioPlayer} = require("@discordjs/voice");
+const {joinVoiceChannel, createAudioPlayer, VoiceConnectionStatus} = require("@discordjs/voice");
 
 module.exports = async function join(message){
     //Check if the user is in a voice channel
