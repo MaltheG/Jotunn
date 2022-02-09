@@ -47,7 +47,7 @@ function userHistory(message, guildID, args){
 }
 
 function guildHistory(message, guildID){
-    db.query(`SELECT requests, plays, songName, songUrl FROM songHistory WHERE guildID = $1 ORDER BY requests DESC LIMIT 10`, [guildID]).then(res =>{
+    db.query(`SELECT SUM(requests) as requests, SUM(plays) as plays, songName, songUrl FROM songHistory WHERE guildID = $1 GROUP BY songName, songUrl ORDER BY requests DESC LIMIT 10`, [guildID]).then(res =>{
         if(res.rows.length < 1){
             message.channel.send("This server has no song history")
             return
