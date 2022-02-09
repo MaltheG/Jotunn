@@ -155,7 +155,8 @@ async function playSoundEffect(message){
             }
 
             //Create audio resource
-            const resource = createAudioResource(fs.createReadStream(location));
+            const resource = createAudioResource(fs.createReadStream(location), {inlineVolume: true});
+            resource.volume.setVolume(3);
             play(guildID, serverQueue, resource);
 
         }).catch(err => {
