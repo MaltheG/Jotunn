@@ -18,7 +18,7 @@ module.exports = async function skip(message){
         return;
     }
 
-    audioPlayer.stop();
+    audioPlayer.pause();
 
     serverQueue.songs.shift();
     message.channel.send("Song skipped");
