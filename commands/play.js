@@ -73,7 +73,7 @@ function getSong(query){
     })
 }
 
-async function playSong(guildID, retry){
+async function playSong(guildID){
     const serverQueue = guildData.getServerQueue(guildID);
     const song = serverQueue.songs[0]
 
@@ -91,24 +91,6 @@ async function playSong(guildID, retry){
     audioPlayer.play(resource);
     serverQueue.playing = true;
     addSongPlay(song);
-
-    audioPlayer.on(AudioPlayerStatus.Idle, () => {
-        console.log("Audioplayer is idle");
-        if(!serverQueue.loop) {
-            serverQueue.songs.shift();
-        }
-        playSong(guildID, false);
-    }).on('error', error => {
-        console.log(error);
-
-        if(!retry){
-            playSong(guildID, true);
-            return
-        }
-
-        serverQueue.songs.shift();
-        playSong(guildID, false);
-    })
 }
 
 async function play(message){
@@ -123,6 +105,20 @@ async function play(message){
         }
         //Update serverQueue after join
         serverQueue = guildData.getServerQueue(guildID);
+
+        const audioPlayer = serverQueue.audioPlayer;
+        audioPlayer.on(AudioPlayerStatus.Idle, () => {
+            console.log("Audioplayer is idle");
+            if(!serverQueue.loop) {
+                serverQueue.songs.shift();
+            }
+            playSong(guildID);
+        }).on('error', error => {
+            console.log(error);
+
+            serverQueue.songs.shift();
+            playSong(guildID);
+        })
     }
 
     //message.channel.send("Searching...");
