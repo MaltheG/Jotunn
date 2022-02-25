@@ -6,29 +6,38 @@ const join = require("./join.js");
 const {getServerQueue} = require("../guildData.js");
 const {AudioPlayerStatus, createAudioPlayer, createAudioResource, getVoiceConnection} = require("@discordjs/voice");
 
+const aws = require("aws-sdk");
+
+aws.config.update({
+    accessKeyId: process.env.S3_ACCESS,
+    secretAccessKey: process.env.S3_SECRET
+})
+
+const s3 = new aws.S3();
+
 function downloadFile(guildID, fileName, url){
-    const folderName = `./soundEffects/${guildID}`;
+    const folderName = `soundEffects/${guildID}`;
 
     return new Promise((resolve, reject) => {
        fetch(url).then(res => {
-           try {
-               if (!fs.existsSync(folderName)) {
-                   fs.mkdirSync(folderName, {recursive: true});
-               }
-           } catch (err) {
-               console.log("Error when creating guild folder");
-               console.log(err);
-               reject(err);
+
+           const params = {
+               Bucket: "jotunnbucket",
+               Body: res.body,
+               Key: `${folderName}/${fileName}`
            }
 
-           const dest = fs.createWriteStream(`${folderName}/${fileName}`)
-           res.body.pipe(dest);
-           res.body.on("end", () => resolve());
-           dest.on("error", (err) => {
-               console.log("Error when trying to write to file");
-               console.log(err)
-               reject(err)
-           });
+           s3.upload(params, (err, data) => {
+               if(err){
+                   console.log("Error when trying to write to upload file");
+                   console.log(err);
+                   reject(err);
+               }
+
+               if(data){
+                   resolve();
+               }
+           })
        }).catch(err => {
            console.log("Error when downloading file");
            console.log(err);
@@ -76,7 +85,7 @@ async function addSoundCommand(message){
     const fileName = `${commandName}.${fileExtension}`;
     const url = message.attachments.first().url;
     downloadFile(guildID, fileName, url).then(() => {
-        const location = `./soundEffects/${guildID}/${fileName}`
+        const location = `soundEffects/${guildID}/${fileName}`
         db.query(`INSERT INTO commands (command, guildid, userid, location)
         VALUES ($1, $2, $3, $4) 
         ON CONFLICT (command, guildid) DO UPDATE SET userid = $3, location = $4`,
@@ -117,14 +126,6 @@ function play(guildID, serverQueue, resource){
     newAudioPlayer.play(resource);
     console.log("Trying to play");
 }
-/*
-.on(AudioPlayerStatus.Playing, () => {
-    console.log("Playing audio file");
-}).on(AudioPlayerStatus.AutoPaused, () => {
-    console.log("I am autopaused");
-}).on(AudioPlayerStatus.Idle, () => {
-    console.log("I am idle");
-})*/
 
 async function playSoundEffect(message){
     const args = message.content.split(" ");
@@ -155,7 +156,16 @@ async function playSoundEffect(message){
             }
 
             //Create audio resource
-            const resource = createAudioResource(fs.createReadStream(location), {inlineVolume: true});
+            const params = {
+                Bucket: "jotunnbucket",
+                Key: location
+            }
+
+            const resource = createAudioResource(s3.getObject(params).createReadStream().on("error", err => {
+                console.log("Failed to load resource from amazon s3");
+                console.log(err)
+            }), {inlineVolume: true});
+
             resource.volume.setVolume(3);
             play(guildID, serverQueue, resource);
 

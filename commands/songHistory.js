@@ -34,7 +34,13 @@ function userHistory(message, guildID, args){
 
         for(let row of res.rows){
             requestString += `${row.requests}\n`;
-            nameString += `[${row.songname}](${row.songurl})\n`
+            let songName = row.songname;
+
+            if(songName.length > 50){
+                songName = songName.substring(0, 50) + "...";
+            }
+
+            nameString += `[${songName}](${row.songurl})\n`
             playsString += `${row.plays}\n`
         }
 
@@ -59,7 +65,13 @@ function guildHistory(message, guildID){
 
         for(let row of res.rows){
             requestString += `${row.requests}\n`;
-            nameString += `[${row.songname}](${row.songurl})\n`
+            let songName = row.songname;
+
+            if(songName.length > 50){
+                songName = songName.substring(0, 50) + "...";
+            }
+
+            nameString += `[${songName}](${row.songurl})\n`
             playsString += `${row.plays}\n`
         }
 

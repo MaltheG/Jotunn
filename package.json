@@ -8,6 +8,7 @@
   "dependencies": {
     "@discordjs/opus": "^0.5.3",
     "@discordjs/voice": "^0.8.0",
+    "aws-sdk": "^2.1081.0",
     "discord.js": "^13.6.0",
     "ffmpeg-static": "^4.4.1",
     "libsodium-wrappers": "^0.7.9",
