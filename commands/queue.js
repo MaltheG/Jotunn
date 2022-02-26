@@ -32,14 +32,14 @@ module.exports = async function queue(message){
             break;
         }
 
-        if(authorString.length + `<@!${song.author}>\n`.length > 1000){
+        if(authorString.length + `<@${song.author}>\n`.length > 1000){
             break;
         }
 
         //Add title to queue string
         queueString += `${song.title}\n`;
         posString += `${pos}\n`;
-        authorString += `<@!${song.author}>\n`;
+        authorString += `<@${song.author}>\n`;
 
         leftToShow--;
         pos++;

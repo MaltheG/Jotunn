@@ -19,7 +19,7 @@ async function addSongPlay(song){
 
 function userHistory(message, guildID, args){
     //Get userID from message
-    const userID = args[1].replace('<@!', '').replace('>', '');
+    const userID = args[1].replace('<@!', '').replace('>', '').replace('<@', '');
 
     db.query(`SELECT requests, plays, songName, songUrl FROM songHistory WHERE guildID = $1 AND userID = $2 ORDER BY requests DESC LIMIT 10`, [guildID, userID]).then(res => {
 

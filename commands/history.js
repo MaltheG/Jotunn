@@ -11,7 +11,7 @@ module.exports = async function history(message){
     }
 
     //Get userID from message
-    const userID = args[1].replace('<@!', '').replace('>', '');
+    const userID = args[1].replace('<@!', '').replace('>', '').replace('<@', '');
 
     let length = 5;
 
@@ -41,7 +41,7 @@ module.exports = async function history(message){
             //Get last n entries
             for(let i = res.rows.length - 1; i >= res.rows.length - length; i--) {
                 nicknameHistory += res.rows[i].nickname + "\n";
-                authorHistory += "<@!" + res.rows[i].namer + ">\n";
+                authorHistory += "<@" + res.rows[i].namer + ">\n";
                 timeHistory += res.rows[i].time + "\n";
             }
             sendHistoryEmbed(message, userID, nicknameHistory, authorHistory, timeHistory);

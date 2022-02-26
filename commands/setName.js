@@ -9,13 +9,13 @@ module.exports = async function setName(message){
     }
 
     //Get userID from message
-    const userID = args[1].replace('<@!', '').replace('>', '');
+    const userID = args[1].replace('<@!', '').replace('>', '').replace('<@', '');
     //Get nickname from message
     const nickname = args.slice(2).join(' ').trim();
 
     //Users are not allowed to change their own name
     if(message.author.id === userID) {
-        return message.channel.send("<@!" + userID + "> er en pølse");
+        return message.channel.send("<@" + userID + "> er en pølse");
     }
 
     if(nickname.length > 32) {
