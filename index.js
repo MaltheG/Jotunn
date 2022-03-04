@@ -102,6 +102,7 @@ bot.on("messageCreate", async message => {
         case "songhistory":
             getSongHistory(message);
             break;
+        case "ae":
         case "addeffect":
             addSoundCommand(message);
             break;
