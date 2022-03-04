@@ -89,10 +89,22 @@ function sendGuildSongHistoryEmbed(message, requestString, nameString, playsStri
     message.channel.send({embeds: [embed]});
 }
 
+function sendGuildSoundEffects(message, commandString, authorString){
+    const embed = new MessageEmbed()
+        .setColor(embedColour)
+        .setAuthor({name: "Sound Effects:"})
+        .addField("Command:", commandString, true)
+        .addField("Added by:", authorString, true)
+        .setTimestamp()
+
+    message.channel.send({embeds: [embed]})
+}
+
 module.exports = {
     sendSongEmbed: sendSongEmbed,
     sendQueueEmbed: sendQueueEmbed,
     sendHistoryEmbed: sendHistoryEmbed,
     sendUserSongHistoryEmbed: sendUserSongHistoryEmbed,
     sendGuildSongHistoryEmbed: sendGuildSongHistoryEmbed,
+    sendGuildSoundEffects: sendGuildSoundEffects,
 }

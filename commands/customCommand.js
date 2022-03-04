@@ -1,5 +1,4 @@
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-const fs = require("fs");
 const db = require("../db.js");
 const {prefix} = require("../config.json");
 const join = require("./join.js");

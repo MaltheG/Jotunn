@@ -20,6 +20,7 @@ const history = require("./commands/history.js");
 const {getSongHistory} = require("./commands/songHistory.js");
 const {addSoundCommand, playSoundEffect} = require("./commands/customCommand");
 const {getVoiceConnection} = require("@discordjs/voice");
+const getEffects = require("./commands/getEffects.js");
 
 //Init database
 dbsetup();
@@ -103,6 +104,16 @@ bot.on("messageCreate", async message => {
             break;
         case "addeffect":
             addSoundCommand(message);
+            break;
+        case "se":
+        case "soundeffects":
+        case "e":
+        case "effects":
+        case "ge":
+        case "geteffects":
+        case "gse":
+        case "getsoundeffects":
+            getEffects(message)
             break;
         default:
             //Look if command is custom command

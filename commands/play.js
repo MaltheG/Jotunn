@@ -138,7 +138,7 @@ async function play(message){
 
         if(!serverQueue.playing) {
             //We are not currently playing a song
-            playSong(guildID, false);
+            playSong(guildID);
             mu.sendSongEmbed(message, song, "Now playing:");
         } else {
             mu.sendSongEmbed(message, song, "Song added:");
