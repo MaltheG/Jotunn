@@ -11,7 +11,7 @@ module.exports = async function playNext(message){
         return
     }
 
-    const lastSong = serverQueue.pop();
+    const lastSong = serverQueue.songs.pop();
     serverQueue.songs.splice(1, 0, lastSong);
 
     message.channel.send(lastSong.title + " moved to front of the queue");

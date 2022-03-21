@@ -114,7 +114,7 @@ bot.on("messageCreate", async message => {
         case "geteffects":
         case "gse":
         case "getsoundeffects":
-            getEffects(message)
+            getEffects(message);
             break;
         default:
             //Look if command is custom command
