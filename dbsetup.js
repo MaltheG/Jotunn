@@ -15,7 +15,7 @@ module.exports = async function init(){
         userid varchar(255)
     );`)
         .then(res => {
-            console.log(res);
+            //console.log(res);
         }).catch(err => {
         console.log(err);
     });
@@ -30,7 +30,7 @@ module.exports = async function init(){
         CONSTRAINT PK_SongRequest PRIMARY KEY (songID, guildID, userID)
     );`)
         .then(res => {
-            console.log(res);
+            //console.log(res);
         }).catch(err => {
         console.log(err);
     })
@@ -43,7 +43,7 @@ module.exports = async function init(){
         CONSTRAINT PK_GuildCommand PRIMARY KEY (command, guildID)
     );`)
         .then(res => {
-            console.log(res);
+            //console.log(res);
         }).catch(err => {
         console.log(err);
     })

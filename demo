@@ -1,2 +1,4 @@
 index.js
-config.json
+commands/play.js
+commands/songHistory.js
+commands/customCommands.js
