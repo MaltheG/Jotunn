@@ -8,6 +8,12 @@ const {addSongRequest, addSongPlay} = require("./songHistory.js");
 
 function getSong(query){
     return new Promise((resolve, reject) => {
+
+        const result = {
+            type: "unknown",
+            songs: []
+        }
+
         //First check if query is url
         if(query.startsWith("https")){
             //Check if youtube link:
@@ -22,8 +28,37 @@ function getSong(query){
                         duration: videoResult.durationRaw,
                         thumbnail: videoResult.thumbnails.pop().url,
                     }
+                    
+                    result.type = "video";
+                    result.songs.push(song);
 
-                    resolve(song);
+                    resolve(result);
+                }).catch(err => {
+                    console.log(err);
+                    reject(err);
+                });
+            }
+
+            if(pl.yt_validate(query) === "playlist"){
+                pl.playlist_info(query).then(playlist => {
+                    playlist.all_videos().then(videos => {
+                        for(videoResult of videos){
+
+                            const song = {
+                                title: videoResult.title,
+                                url: videoResult.url,
+                                id: videoResult.id,
+                                duration: videoResult.durationRaw,
+                                thumbnail: videoResult.thumbnails.pop().url,
+                            }
+
+                            result.songs.push(song);
+                        }
+
+                        result.type = "playlist";
+
+                        resolve(result);
+                    })
                 }).catch(err => {
                     console.log(err);
                     reject(err);
@@ -47,14 +82,14 @@ function getSong(query){
 
         } else {
             pl.search(query, {limit: 1})
-                .then(result => {
+                .then(res => {
 
-                    if(result.length < 1) {
+                    if(res.length < 1) {
                         console.log("No results from query");
                         reject("No results from query");
                     }
 
-                    const videoResult = result[0];
+                    const videoResult = res[0];
 
                     const song = {
                         title: videoResult.title,
@@ -64,7 +99,10 @@ function getSong(query){
                         thumbnail: videoResult.thumbnails.pop().url,
                     }
 
-                    resolve(song);
+                    result.type = "video"
+                    result.songs.push(song);
+
+                    resolve(result);
                 }).catch(err => {
                 console.log(err);
                 reject(err);
@@ -81,6 +119,8 @@ async function playSong(guildID){
         serverQueue.playing = false;
         return
     }
+
+    console.log(song);
 
     const source = await pl.stream(song.url);
 
@@ -125,24 +165,38 @@ async function play(message){
 
     const searchTerm = message.content.substr(message.content.indexOf(' ') + 1).trim();
 
-    getSong(searchTerm).then(song => {
-        song.position = serverQueue.songs.length;
-        song.guild = guildID;
-        song.author = message.member.id;
+    getSong(searchTerm).then(result => {
 
-        //Add request to database
-        addSongRequest(song);
+        for (song of result.songs){
+            song.position = serverQueue.songs.length;
+            song.guild = guildID;
+            song.author = message.member.id;
 
-        //Push song to queue
-        serverQueue.songs.push(song);
+            console.log(song)
 
-        if(!serverQueue.playing) {
-            //We are not currently playing a song
-            playSong(guildID);
-            mu.sendSongEmbed(message, song, "Now playing:");
-        } else {
-            mu.sendSongEmbed(message, song, "Song added:");
+            //Add request to database
+            addSongRequest(song);
+
+            //Push song to queue
+            serverQueue.songs.push(song);
         }
+
+        //We have added a playlist
+        if(result.songs.length > 1){
+            mu.sendPlaylistEmbed(message, result.songs.length);
+        } else {
+            if(serverQueue.playing){
+                mu.sendSongEmbed(message, result.songs[0], "Song added:");
+                return;
+            }
+        }
+
+        if(!serverQueue.playing){
+            //We are not currently playing a song
+            playSong(guildID)
+            mu.sendSongEmbed(message, result.songs[0], "Now playing:");
+        }
+
     }).catch(err => {
         message.channel.send("Something went wrong when trying to play this song: " + err);
     });

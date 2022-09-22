@@ -100,6 +100,10 @@ function sendGuildSoundEffects(message, commandString, authorString){
     message.channel.send({embeds: [embed]})
 }
 
+function sendPlaylistEmbed(message, length){
+    message.channel.send(length + " songs added to queue");
+}
+
 module.exports = {
     sendSongEmbed: sendSongEmbed,
     sendQueueEmbed: sendQueueEmbed,
@@ -107,4 +111,5 @@ module.exports = {
     sendUserSongHistoryEmbed: sendUserSongHistoryEmbed,
     sendGuildSongHistoryEmbed: sendGuildSongHistoryEmbed,
     sendGuildSoundEffects: sendGuildSoundEffects,
+    sendPlaylistEmbed: sendPlaylistEmbed,
 }
