@@ -32,6 +32,7 @@ bot.once("ready", () => {
 })
 
 const token = process.env.JOTUNN_TOKEN;
+let redsun = false;
 bot.login(token);
 
 bot.on("messageCreate", async message => {
@@ -50,6 +51,9 @@ bot.on("messageCreate", async message => {
             break;
         case "p":
         case "play":
+            if(redsun){
+                message.content = ".filtered red sun in the sky";
+            }
             play(message);
             break;
         case "join":
@@ -115,6 +119,9 @@ bot.on("messageCreate", async message => {
         case "gse":
         case "getsoundeffects":
             getEffects(message);
+            break;
+        case "redsun":
+            redsun = !redsun;
             break;
         default:
             //Look if command is custom command
