@@ -2,7 +2,7 @@
   "name": "jotunn",
   "version": "2.1.0",
   "description": "The Best Bot",
-  "main": "index.js",
+  "start": "index.js",
   "author": "Jalthe",
   "license": "ISC",
   "dependencies": {
