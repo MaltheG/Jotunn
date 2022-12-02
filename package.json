@@ -2,6 +2,9 @@
   "name": "jotunn",
   "version": "2.1.0",
   "description": "The Best Bot",
+  "scripts": {
+    "start": "node index.js"
+  },
   "main": "index.js",
   "author": "Jalthe",
   "license": "ISC",
