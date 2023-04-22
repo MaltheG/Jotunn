@@ -4,7 +4,7 @@ const {sendUserSongHistoryEmbed, sendGuildSongHistoryEmbed} = require("../messag
 async function addSongRequest(song){
     db.query(`INSERT INTO songHistory (songName, songUrl, songID, guildID, userID, requests, plays) 
     VALUES($1, $2, $3, $4, $5, $6, $7)
-    ON CONFLICT (songID, guildID, userID) DO UPDATE SET requests = songHistory.requests + 1`,
+    ON DUPLICATE KEY UPDATE requests = songHistory.requests + 1`,
         [song.title, song.url, song.id, song.guild, song.author, 1, 0]).catch(err => {
         console.log(err);
     })
@@ -34,13 +34,13 @@ function userHistory(message, guildID, args){
 
         for(let row of res.rows){
             requestString += `${row.requests}\n`;
-            let songName = row.songname;
+            let songName = row.songName;
 
             if(songName.length > 50){
                 songName = songName.substring(0, 50) + "...";
             }
 
-            nameString += `[${songName}](${row.songurl})\n`
+            nameString += `[${songName}](${row.songUrl})\n`
             playsString += `${row.plays}\n`
         }
 
@@ -65,13 +65,13 @@ function guildHistory(message, guildID){
 
         for(let row of res.rows){
             requestString += `${row.requests}\n`;
-            let songName = row.songname;
+            let songName = row.songName;
 
             if(songName.length > 50){
                 songName = songName.substring(0, 50) + "...";
             }
 
-            nameString += `[${songName}](${row.songurl})\n`
+            nameString += `[${songName}](${row.songUrl})\n`
             playsString += `${row.plays}\n`
         }
 

@@ -87,7 +87,7 @@ async function addSoundCommand(message){
         const location = `soundEffects/${guildID}/${fileName}`
         db.query(`INSERT INTO commands (command, guildid, userid, location)
         VALUES ($1, $2, $3, $4) 
-        ON CONFLICT (command, guildid) DO UPDATE SET userid = $3, location = $4`,
+        ON DUPLICATE KEY UPDATE userid = $3, location = $4`,
             [commandName, guildID, userID, location]).then(() => {
             message.channel.send(`Sound effect added. Play with ${prefix}${commandName}`);
         }).catch(err => {

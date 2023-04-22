@@ -31,7 +31,7 @@ module.exports = async function setName(message){
             }
 
             //Add name to database and then disconnect
-            db.query(`INSERT INTO History (UserID, Nickname, Namer) VALUES($1, $2, $3);`, [userID, nickname, message.author.id])
+            db.query(`INSERT INTO history (UserID, Nickname, Namer) VALUES($1, $2, $3);`, [userID, nickname, message.author.id])
                 .catch((error) => console.log(error));
 
             return message.channel.send("Successfully changed name");

@@ -1,9 +1,7 @@
 const mysql = require("mysql");
 
-const client = mysql.createConnection({
-    connectionString: process.env.DATABASE_URL,
+const client = mysql.createConnection(process.env.DATABASE_URL);
     //ssl: {rejectUnauthorized: false},
-})
 
 module.exports = async function init(){
     client.connect();
@@ -13,11 +11,8 @@ module.exports = async function init(){
         nickname varchar(255),
         time timestamp,
         userid varchar(255)
-    );`)
-        .then(res => {
-            //console.log(res);
-        }).catch(err => {
-        console.log(err);
+    );`, (err, result) => {
+        if (err) console.log(err)
     });
 
     client.query(`CREATE TABLE IF NOT EXISTS songHistory (
@@ -28,12 +23,9 @@ module.exports = async function init(){
         userID varchar(255) NOT NULL,
         requests integer,plays integer,
         CONSTRAINT PK_SongRequest PRIMARY KEY (songID, guildID, userID)
-    );`)
-        .then(res => {
-            //console.log(res);
-        }).catch(err => {
-        console.log(err);
-    })
+    );`, (err, result) => {
+        if (err) console.log(err)
+    });
 
     client.query(`CREATE TABLE IF NOT EXISTS commands (
         command varchar(255) NOT NULL,
@@ -41,10 +33,7 @@ module.exports = async function init(){
         userID varchar(255),
         location varchar(1023),
         CONSTRAINT PK_GuildCommand PRIMARY KEY (command, guildID)
-    );`)
-        .then(res => {
-            //console.log(res);
-        }).catch(err => {
-        console.log(err);
-    })
+    );`, (err, result) => {
+        if (err) console.log(err)
+    });
 }
