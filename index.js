@@ -21,6 +21,7 @@ const {getSongHistory} = require("./commands/songHistory.js");
 const {addSoundCommand, playSoundEffect} = require("./commands/customCommand");
 const {getVoiceConnection} = require("@discordjs/voice");
 const getEffects = require("./commands/getEffects.js");
+const {payout} = require("./commands/casino.js");
 
 //Init database
 dbsetup();
@@ -156,3 +157,7 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
         }, 30000);
     }
 });
+
+setTimeout(() => {
+    payout();
+}, 600000);

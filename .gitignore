@@ -1,5 +1,7 @@
 config.json
 local.js
+localProd.js
+*.zip
 
 # Logs
 logs

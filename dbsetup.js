@@ -1,8 +1,8 @@
-const {Client} = require("pg")
+const mysql = require("mysql");
 
-const client = new Client({
+const client = mysql.createConnection({
     connectionString: process.env.DATABASE_URL,
-    ssl: {rejectUnauthorized: false},
+    //ssl: {rejectUnauthorized: false},
 })
 
 module.exports = async function init(){

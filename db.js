@@ -1,8 +1,8 @@
-const {Pool} = require("pg");
+const mysql = require("mysql");
 
-const pool = new Pool({
+const pool = mysql.createPool({
     connectionString: process.env.DATABASE_URL,
-    ssl: {rejectUnauthorized: false},
+    //ssl: {rejectUnauthorized: false},
 });
 
 /*
