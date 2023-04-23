@@ -21,7 +21,7 @@ const {getSongHistory} = require("./commands/songHistory.js");
 const {addSoundCommand, playSoundEffect} = require("./commands/customCommand");
 const {getVoiceConnection} = require("@discordjs/voice");
 const getEffects = require("./commands/getEffects.js");
-const {payout, gift, balance, slots} = require("./commands/casino.js");
+const {payout, gift, balance, slots, leaderboards} = require("./commands/casino.js");
 
 //Init database
 dbsetup();
@@ -135,6 +135,14 @@ bot.on("messageCreate", async message => {
             break;
         case "slots":
             slots(message);
+            break;
+        case "leaderboards":
+        case "scoreboards":
+        case "scoreboard":
+        case "leaderboard":
+        case "lb":
+        case "sb":
+            leaderboards(message);
             break;
         default:
             //Look if command is custom command

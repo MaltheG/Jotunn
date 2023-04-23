@@ -1,6 +1,7 @@
 const {prefix} = require("../config.json");
 const db = require("../db.js");
 const {betSlots} = require("../casino/slots.js");
+const {MessageEmbed} = require("discord.js");
 
 const minBet = 10;
 
@@ -24,6 +25,67 @@ const casinoGuilds = [
         ]
     }
 ]
+
+function leaderboards(message) {
+    const guildID = message.guild.id;
+    const memberID = message.member.id;
+
+    db.query(`SELECT userID, balance FROM casino WHERE guildID = $1 ORDER BY balance DESC`, [guildID]).then(res => {
+        if(res.rows.length < 1) {
+            message.channel.send("No leaderboards yet... Or maybe something went wrong...");
+            return
+        }
+
+        let userPos = "";
+        let userID = "";
+        let userBalance = "";
+
+        for(let i = 0; i < res.rows.length; i++) {
+            if(res.rows[i].userID == memberID) {
+                userPos = `${i + 1} / ${res.rows.length}`;
+                userID = `<@${memberID}>`;
+                userBalance = `${res.rows[i].balance}`;
+
+                break;
+            }
+        }
+
+        let positionString = ""
+        let userString = ""
+        let balanceString = ""
+
+        let leaderLength = 10;
+
+        if(res.rows.length < leaderLength) leaderLength = res.rows.length;
+
+        for(let i = 0; i < leaderLength; i++) {
+            positionString += `${i + 1}\n`
+            userString += `<@${res.rows[i].userID}>\n`
+            balanceString += `${res.rows[i].balance}\n`
+        }
+
+        const embed = new MessageEmbed()
+        .setColor("#FFD700")
+        .setTitle(":trophy: Leaderboards :trophy: :")
+        .addFields(
+            { name: 'Pos', value: positionString, inline: true },
+            { name: 'User', value: userString, inline: true },
+            { name: 'Balance', value: balanceString, inline: true }
+        )
+        
+        
+        if (userPos != "") {
+            embed.addFields(
+                { name: " ", value: "Your position:" },
+                { name: 'Pos', value: userPos, inline: true },
+                { name: 'User', value: userID, inline: true },
+                { name: 'Balance', value: userBalance, inline: true }
+            );
+        }
+
+        message.channel.send({ embeds: [embed] });
+    });
+}
 
 function addWin(guildID, memberID, amount) {
     db.query(`INSERT INTO casino (guildID, userID, balance, win) 
@@ -208,5 +270,6 @@ module.exports = {
     payout: payout,
     gift: gift,
     balance: balance,
-    slots: slots
+    slots: slots,
+    leaderboards: leaderboards
 }
