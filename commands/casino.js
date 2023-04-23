@@ -2,6 +2,7 @@ const {prefix} = require("../config.json");
 const db = require("../db.js");
 const {betSlots} = require("../casino/slots.js");
 const {MessageEmbed} = require("discord.js");
+const { isValidBet, betRoulette } = require("../casino/roulette");
 
 const minBet = 10;
 
@@ -165,6 +166,69 @@ function slots(message) {
     });
 }
 
+function roulette(message) {
+    const guildID = message.guild.id;
+    const memberID = message.member.id;
+
+    const args = message.content.split(' ');
+
+    if(args.length < 3) {
+        message.channel.send(`Bad format. Usage: ${prefix}roulette [bet] [bet_amount]`);
+        return;
+    }
+
+    const bet = args[1].toLowerCase().trim();
+
+    if(!isValidBet(bet)) {
+        message.channel.send(`${bet} is not a valid bet! Choose black or something, idk.`);
+        return
+    }
+
+    let amount = 0;
+
+    if(args[2].toLowerCase().trim() == "all") {
+        amount = -1;
+    } else {
+        amount = parseInt(args[2]);
+
+        if(isNaN(amount)) {
+            message.channel.send("Nice try dumbo");
+            return;
+        }
+    
+        if(amount < minBet) {
+            message.channel.send("Minimum bet amount: " + minBet);
+            return;
+        }
+    }
+
+    db.query(`SELECT balance FROM casino WHERE guildID = $1 AND userID = $2`, [guildID, memberID]).then(res => {
+        if(res.rows.length < 1) {
+            message.channel.send("Something went wrong, sry dude!");
+            return
+        }
+
+        let balance = parseInt(res.rows[0].balance);
+
+        if(amount == -1) {
+            amount = balance;
+        }
+
+        if (balance < amount) {
+            message.channel.send("Sry, you're too poor! Your balance is: " + balance);
+            return;
+        }
+
+        const balanceChange = betRoulette(message, bet, amount);
+
+        if (balanceChange > 0) {
+            addWin(guildID, memberID, balanceChange);
+        } else {
+            addLoss(guildID, memberID, balanceChange);
+        }
+    });
+}
+
 function balance(message) {
     const guildID = message.guild.id;
     const memberID = message.member.id;
@@ -281,5 +345,6 @@ module.exports = {
     gift: gift,
     balance: balance,
     slots: slots,
+    roulette: roulette,
     leaderboards: leaderboards
 }
