@@ -129,6 +129,11 @@ function gift(message) {
         return;
     }
 
+    if(amount < 0) {
+        message.channel.send("Very clenver");
+        return;
+    }
+
     db.query(`SELECT balance FROM casino WHERE guildID = $1 AND userID = $2`, [guildID, gifterID]).then(res => {
         if(res.rows.length < 1) {
             message.channel.send("Something went wrong, sry dude!");

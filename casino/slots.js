@@ -71,7 +71,7 @@ function betSlots(message, amount) {
     }
 }
 
-
+//98% return
 function testSlots(iterations) {
     let won = 0;
     let lost = 0;
