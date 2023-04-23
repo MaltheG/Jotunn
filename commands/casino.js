@@ -130,7 +130,7 @@ function gift(message) {
     }
 
     if(amount < 0) {
-        message.channel.send("Very clenver");
+        message.channel.send("Very clever");
         return;
     }
 
