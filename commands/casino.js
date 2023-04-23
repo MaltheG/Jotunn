@@ -66,7 +66,7 @@ function leaderboards(message) {
 
         const embed = new MessageEmbed()
         .setColor("#FFD700")
-        .setTitle(":trophy: Leaderboards :trophy: :")
+        .setTitle(":trophy: Leaderboards :trophy:")
         .addFields(
             { name: 'Pos', value: positionString, inline: true },
             { name: 'User', value: userString, inline: true },
@@ -120,16 +120,22 @@ function slots(message) {
         return;
     }
 
-    const amount = parseInt(args[1]);
+    let amount = 0;
 
-    if(isNaN(amount)) {
-        message.channel.send("Nice try dumbo");
-        return;
-    }
+    if(args[1].toLowerCase().trim() == "all") {
+        amount = -1;
+    } else {
+        amount = parseInt(args[1]);
 
-    if(amount < minBet) {
-        message.channel.send("Minimum bet amount: " + minBet);
-        return;
+        if(isNaN(amount)) {
+            message.channel.send("Nice try dumbo");
+            return;
+        }
+    
+        if(amount < minBet) {
+            message.channel.send("Minimum bet amount: " + minBet);
+            return;
+        }
     }
 
     db.query(`SELECT balance FROM casino WHERE guildID = $1 AND userID = $2`, [guildID, memberID]).then(res => {
@@ -139,6 +145,10 @@ function slots(message) {
         }
 
         let balance = parseInt(res.rows[0].balance);
+
+        if(amount == -1) {
+            amount = balance;
+        }
 
         if (balance < amount) {
             message.channel.send("Sry, you're too poor! Your balance is: " + balance);

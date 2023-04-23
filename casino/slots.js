@@ -65,7 +65,7 @@ function betSlots(message, amount) {
         message.channel.send({embeds: [embed]})
         return profit;
     } else {
-        embed.addFields( {name: "You lost", value: "No bueno :sob:"} )
+        embed.addFields( {name: "You lost!", value: `Loss: ${amount} TOPS :sob:!`} )
         message.channel.send({embeds: [embed]})
         return -amount;
     }
