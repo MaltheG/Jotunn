@@ -1,4 +1,5 @@
 const db = require("../db.js")
+const {prefix} = require("../config.json");
 
 //Set nickname of user in channel
 module.exports = async function setName(message){

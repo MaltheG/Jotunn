@@ -21,7 +21,7 @@ module.exports = async function init(){
         songID varchar(255) NOT NULL,
         guildID varchar(255) NOT NULL,
         userID varchar(255) NOT NULL,
-        requests integer,plays integer,
+        requests integer DEFAULT 0, plays integer DEFAULT 0,
         CONSTRAINT PK_SongRequest PRIMARY KEY (songID, guildID, userID)
     );`, (err, result) => {
         if (err) console.log(err)
@@ -36,4 +36,19 @@ module.exports = async function init(){
     );`, (err, result) => {
         if (err) console.log(err)
     });
+
+    client.query(`CREATE TABLE IF NOT EXISTS casino (
+        guildID varchar(255) NOT NULL,
+        userID varchar(255) NOT NULL,
+        balance integer DEFAULT 0,
+        loss integer DEFAULT 0,
+        win integer DEFAULT 0,
+        gifted integer DEFAULT 0,
+        received integer DEFAULT 0,
+        CONSTRAINT PK_GuildUser PRIMARY KEY (guildID, userID)
+    );`, (err, result) => {
+        if (err) console.log(err)
+    });
+
+    client.end();
 }

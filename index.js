@@ -21,7 +21,7 @@ const {getSongHistory} = require("./commands/songHistory.js");
 const {addSoundCommand, playSoundEffect} = require("./commands/customCommand");
 const {getVoiceConnection} = require("@discordjs/voice");
 const getEffects = require("./commands/getEffects.js");
-const {payout} = require("./commands/casino.js");
+const {payout, gift, balance, slots} = require("./commands/casino.js");
 
 //Init database
 dbsetup();
@@ -124,6 +124,18 @@ bot.on("messageCreate", async message => {
         case "redsun":
             redsun = !redsun;
             break;
+        case "give":
+        case "gift":
+        case "g":
+            gift(message);
+            break;
+        case "balance":
+        case "b":
+            balance(message);
+            break;
+        case "slots":
+            slots(message);
+            break;
         default:
             //Look if command is custom command
             playSoundEffect(message);
@@ -158,6 +170,6 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
     }
 });
 
-setTimeout(() => {
-    payout();
+setInterval(() => {
+    payout(bot);
 }, 600000);
