@@ -61,7 +61,7 @@ function betSlots(message, amount) {
     if (win) {
         const profit = (amount * multiplier);
 
-        embed.addFields( {name: "You won!", value: "Profit: " + profit + " TOPS :fire:!"} );
+        embed.addFields( {name: "You won!", value: "Prize: " + profit + " TOPS :fire:!"} );
         message.channel.send({embeds: [embed]})
         return profit;
     } else {

@@ -86,7 +86,7 @@ function leaderboards(message) {
     });
 }
 
-function addWin(guildID, memberID, amount) {
+function addWin(message, guildID, memberID, amount) {
     db.query(`INSERT INTO casino (guildID, userID, balance, win) 
     VALUES($1, $2, $3, $3) 
     ON DUPLICATE KEY UPDATE balance = casino.balance + $3, win = casino.win + $3`,
@@ -97,7 +97,7 @@ function addWin(guildID, memberID, amount) {
     })
 }
 
-function addLoss(guildID, memberID, amount) {
+function addLoss(message, guildID, memberID, amount) {
     db.query(`INSERT INTO casino (guildID, userID, balance, loss) 
     VALUES($1, $2, $3, $3) 
     ON DUPLICATE KEY UPDATE balance = casino.balance + $3, loss = casino.loss + $3`,
@@ -157,9 +157,9 @@ function slots(message) {
         const balanceChange = betSlots(message, amount);
 
         if (balanceChange > 0) {
-            addWin(guildID, memberID, balanceChange);
+            addWin(message, guildID, memberID, balanceChange - amount);
         } else {
-            addLoss(guildID, memberID, balanceChange);
+            addLoss(message, guildID, memberID, balanceChange);
         }
     });
 }
@@ -220,9 +220,9 @@ function roulette(message) {
         const balanceChange = betRoulette(message, bet, amount);
 
         if (balanceChange > 0) {
-            addWin(guildID, memberID, balanceChange);
+            addWin(message, guildID, memberID, balanceChange - amount);
         } else {
-            addLoss(guildID, memberID, balanceChange);
+            addLoss(message, guildID, memberID, balanceChange);
         }
     });
 }
