@@ -129,6 +129,7 @@ async function playSong(guildID){
     const audioPlayer = serverQueue.audioPlayer;
 
     audioPlayer.play(resource);
+
     serverQueue.playing = true;
     addSongPlay(song);
 }

@@ -11,11 +11,13 @@ function sendSongEmbed(message, song, title){
             .setTitle(song.title)
             .setURL(song.url)
             .setAuthor({name: title})
-            .addField("Total requests:", res.rows[0].totalrequests, true)
-            .addField("Total plays:", res.rows[0].totalplays, true)
-            .addField("Added by:", "<@!" + song.author + ">")
-            .addField("Position in queue:", song.position.toString(), true)
-            .addField("Song duration:", song.duration, true)
+            .addFields(
+                { name: "Total requests:", value: res.rows[0].totalrequests, inline: true },
+                { name: "Total plays:", value: res.rows[0].totalplays, inline: true },
+                { name: "Added by:", value: "<@!" + song.author + ">" },
+                { name: "Position in queue:", value: song.position.toString(), inline: true },
+                { name: "Song duration:", value: song.duration, inline: true }
+            )
             .setImage(song.thumbnail)
             .setTimestamp()
 
@@ -29,9 +31,11 @@ function sendSongEmbed(message, song, title){
             .setTitle(song.title)
             .setURL(song.url)
             .setAuthor({name: title})
-            .addField("Added by:", "<@!" + song.author + ">")
-            .addField("Position in queue:", song.position.toString(), true)
-            .addField("Song duration:", song.duration, true)
+            .addFields(
+                { name: "Added by:", value: "<@!" + song.author + ">" },
+                { name: "Position in queue:", value: song.position.toString(), inline: true },
+                { name: "Song duration:", value: song.duration, inline: true }
+            )
             .setImage(song.thumbnail)
             .setTimestamp()
 
@@ -43,9 +47,11 @@ function sendQueueEmbed(message, positionString, queueString, authorString){
     const embed = new MessageEmbed()
         .setColor(embedColour)
         .setAuthor({name: "Queue:"})
-        .addField("Position:", positionString, true)
-        .addField("Track:", queueString, true)
-        .addField("Requested by:", authorString, true)
+        .addFields(
+            { name: "Position:", value: positionString, inline: true },
+            { name: "Track:", value: queueString, inline: true },
+            { name: "Requested by:", value: authorString, inline: true }
+        )
         .setTimestamp()
 
     message.channel.send({embeds: [embed]});
@@ -55,10 +61,12 @@ function sendHistoryEmbed(message, userID, nicknameHistory, authorHistory, timeH
     const embed = new MessageEmbed()
         .setColor(embedColour)
         .setAuthor({name: "Nickname history"})
-        .addField("User:", "<@!" + userID + ">")
-        .addField("Nickname:", nicknameHistory, true)
-        .addField("Author:", authorHistory, true)
-        .addField("Date:", timeHistory, true)
+        .addFields(
+            { name: "User:", value: "<@!" + userID + ">" },
+            { name: "Nickname:", value: nicknameHistory, inline: true },
+            { name: "Author:", value: authorHistory, inline: true },
+            { name: "Date:", value: timeHistory, inline: true }
+        )
         .setTimestamp()
 
     message.channel.send({embeds: [embed]});
@@ -68,10 +76,12 @@ function sendUserSongHistoryEmbed(message, userID, requestString, nameString, pl
     const embed = new MessageEmbed()
         .setColor(embedColour)
         .setAuthor({name: "Song history"})
-        .addField("User:", "<@!" + userID + ">")
-        .addField("Requests:", requestString, true)
-        .addField("Song:", nameString, true)
-        .addField("Plays:", playsString, true)
+        .addFields(
+            { name: "User:", value: "<@!" + userID + ">" },
+            { name: "Requests:", value: requestString, inline: true },
+            { name: "Song:", value: nameString, inline: true },
+            { name: "Plays:", value: playsString, inline: true }
+        )
         .setTimestamp()
 
     message.channel.send({embeds: [embed]});
@@ -81,9 +91,11 @@ function sendGuildSongHistoryEmbed(message, requestString, nameString, playsStri
     const embed = new MessageEmbed()
         .setColor(embedColour)
         .setAuthor({name: "Song history"})
-        .addField("Requests:", requestString, true)
-        .addField("Song:", nameString, true)
-        .addField("Plays:", playsString, true)
+        .addFields(
+            { name: "Requests:", value: requestString, inline: true },
+            { name: "Song:", value: nameString, inline: true },
+            { name: "Plays:", value: playsString, inline: true }
+        )
         .setTimestamp()
 
     message.channel.send({embeds: [embed]});
@@ -93,8 +105,10 @@ function sendGuildSoundEffects(message, commandString, authorString){
     const embed = new MessageEmbed()
         .setColor(embedColour)
         .setAuthor({name: "Sound Effects:"})
-        .addField("Command:", commandString, true)
-        .addField("Added by:", authorString, true)
+        .addFields(
+            { name: "Command:", value: commandString, inline: true },
+            { name: "Added by::", value: authorString, inline: true }
+        )
         .setTimestamp()
 
     message.channel.send({embeds: [embed]})
