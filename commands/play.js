@@ -1,5 +1,8 @@
-const {getVoiceConnection, createAudioResource, AudioPlayerStatus} = require("@discordjs/voice");
+const {getVoiceConnection, createAudioResource, AudioPlayerStatus, StreamType} = require("@discordjs/voice");
 const pl = require("play-dl");
+const youtubedl = require('youtube-dl-exec')
+const ffmpeg = require('ffmpeg-static');
+const { spawn } = require('child_process');
 
 const guildData = require("../guildData.js");
 const join = require("./join.js");
@@ -122,9 +125,47 @@ async function playSong(guildID){
 
     console.log(song);
 
-    const source = await pl.stream(song.url);
+    //const source = await youtubedl.exec(song.url);
 
-    const resource = createAudioResource(source.stream, {inputType: source.type});
+    const ytdlResult = await youtubedl(song.url, {
+        dumpSingleJson: true,
+        noCheckCertificates: true,
+        noWarnings: true,
+        preferFreeFormats: true,
+        format: 'bestaudio[ext=m4a]/bestaudio/best',
+        addHeader: ['referer:youtube.com', 'user-agent:googlebot'],
+    });
+
+    const audioUrl = ytdlResult.entries?.[0]?.url || ytdlResult.url
+    
+    //console.log(audioUrl);
+
+    const ffmpegProcess = spawn(ffmpeg, [
+        '-loglevel', 'info',
+        '-reconnect', '1',
+        '-reconnect_streamed', '1',
+        '-reconnect_delay_max', '5',
+        '-headers', 'User-Agent: Mozilla/5.0\r\nReferer: https://www.youtube.com\r\n',
+        '-i', audioUrl,
+        '-f', 's16le',
+        '-ar', '48000',
+        '-ac', '2',
+        'pipe:1'
+      ], { stdio: ['pipe', 'pipe', 'pipe'] });  // Allow stderr for logging
+    
+    // ffmpegProcess.stderr.on('data', (chunk) => {
+    //     console.log(`[FFmpeg]: ${chunk.toString()}`);
+    // });
+
+    ffmpegProcess.on('close', code => {
+        if (code !== 0) {
+          console.error(`FFmpeg exited with code ${code}`);
+        }
+    });    
+
+    const resource = createAudioResource(ffmpegProcess.stdout, {
+        inputType: StreamType.Raw
+    });
 
     const audioPlayer = serverQueue.audioPlayer;
 
