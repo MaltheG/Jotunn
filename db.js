@@ -31,8 +31,7 @@ module.exports = {
             newParams.push(params[index - 1]);
 
             newText += "?" + str.slice(1);
-        }
-        
+        }        
 
         return new Promise((resolve, reject) => {
             pool.query(newText, newParams, (err, rows) => {

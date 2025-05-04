@@ -21,7 +21,7 @@ const {getSongHistory} = require("./commands/songHistory.js");
 const {addSoundCommand, playSoundEffect} = require("./commands/customCommand");
 const {getVoiceConnection} = require("@discordjs/voice");
 const getEffects = require("./commands/getEffects.js");
-const {payout, gift, balance, slots, leaderboards, roulette} = require("./commands/casino.js");
+const {payout, gift, balance, slots, leaderboards, roulette, blackjack, stand, hit} = require("./commands/casino.js");
 
 //Init database
 dbsetup();
@@ -138,6 +138,20 @@ bot.on("messageCreate", async message => {
             break;
         case "roulette":
             roulette(message);
+            break;        
+        case "blackjack":
+        case "bj":
+            blackjack(message);
+            break;
+        case "hit":
+        case "hi":
+        case "h":
+            hit(message);
+            break;
+        case "stand":
+        case "stay":
+        case "st":
+            stand(message);
             break;
         case "leaderboards":
         case "scoreboards":
@@ -154,7 +168,7 @@ bot.on("messageCreate", async message => {
     }
 })
 
-//Idle timer. Leave voice channel if no user for 30 seconds
+//Idle timer. Leave voice channel if no user for 5 seconds
 bot.on('voiceStateUpdate', (oldState, newState) => {
     if(oldState.channelId !== oldState.guild.me.voice.channelId || newState.channel){
         return;
@@ -177,7 +191,7 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
 
                 guildData.removeServerQueue(guildID);
             }
-        }, 30000);
+        }, 5000);
     }
 });
 
