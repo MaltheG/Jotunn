@@ -253,7 +253,7 @@ async function hit(message) {
         embed.addField("Busted!", `You lost ${result.bet} TOPS :sob:`);
         message.channel.send({ embeds: [embed] });
         Blackjack.clearGame(memberID);
-        addLoss(message, guildID, memberID, result.bet);
+        addLoss(message, guildID, memberID, -result.bet);
     } else {
         const embed = Blackjack.renderGameEmbed(memberID);
         message.channel.send({ embeds: [embed]});
@@ -278,7 +278,7 @@ async function stand(message) {
         embed.addField("Push!", "It's a tie, your bet is returned.");
     } else {
         embed.addField(`You lost ${outcome.bet} TOPS :sob:`, "Better luck next time!");
-        addLoss(message, guildID, memberID, outcome.bet);
+        addLoss(message, guildID, memberID, -outcome.bet);
     }
 
     message.channel.send({ embeds: [embed] });
