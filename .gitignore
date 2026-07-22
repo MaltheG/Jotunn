@@ -1,45 +1,5 @@
-# -----------------------------------------------
-# .NET
-# -----------------------------------------------
-
-# Build output
-bin/
-obj/
-
-# User-specific Visual Studio files
-*.user
-*.suo
-.vs/
-
-# Rider
-.idea/
-
-# NuGet
-*.nupkg
-*.snupkg
-project.lock.json
-packages/
-
-# Local secrets / launch profiles (contain tokens and passwords)
-**/Properties/launchSettings.json
-
-# -----------------------------------------------
-# Node.js (original bot)
-# -----------------------------------------------
-
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Local env files
 .env
-.env.local
-.env.*.local
 
-# -----------------------------------------------
-# OS
-# -----------------------------------------------
-
-.DS_Store
-Thumbs.db
+# play-dl caches YouTube's player script to the working directory at runtime
+*-player-script.js
