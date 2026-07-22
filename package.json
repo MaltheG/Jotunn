@@ -1,0 +1,24 @@
+{
+  "name": "jotunn",
+  "version": "1.0.0",
+  "description": "Discord bot with music, casino, and utility commands",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file=.env src/index.js",
+    "deploy": "node --env-file=.env src/deploy-commands.js"
+  },
+  "engines": {
+    "node": ">=20.6.0"
+  },
+  "dependencies": {
+    "@discordjs/voice": "^0.19.2",
+    "discord.js": "^14.18.0",
+    "ffmpeg-static": "4.4.1",
+    "libsodium-wrappers": "^0.8.4",
+    "mysql2": "^3.11.0",
+    "opusscript": "^0.1.1",
+    "play-dl": "^1.9.7"
+  },
+  "allowScripts": {}
+}
